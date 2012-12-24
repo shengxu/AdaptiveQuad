@@ -13,22 +13,27 @@ class F
 public:
 	virtual double operator ()(double x) const=0;
 };
+
 class Fun:public F {
 public:
 	double operator()(double x) const {
 	      return log(1.0+x)/(1.0+x*x);
 	}
 };
+
 class sigv:public F {
 public:
 	int A;
 	double v;
+	std::vector<double> xs_E;
+	std::vector<double> xs_v;
+	std::vector<double> xs_sig;
 	
 	// constructor
-	sigv(int _A, double _v) : A(_A), v(_v) {}
+	sigv(int _A, double _v, std::vector<double> &_xs_E, std::vector<double> &_xs_v, std::vector<double> &_xs_sig) : A(_A), v(_v), xs_E(_xs_E), xs_v(_xs_v), xs_sig(_xs_sig) {}	
 	
 	double operator()(double V) const {
-		double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*T);
+		double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);
 		return (double) std::pow(alpha/CONST::PI, 0.5)*std::pow(V/v, 2)*std::exp(-alpha*std::pow(V-v,2))*interp(xs_v.begin(), xs_sig.begin(), V, xs_v.size());
 	}
 };

@@ -4,6 +4,8 @@
 #include <assert.h>
 #include "adapsimpsint.h"
 
+using namespace std;
+
 double AdapSimps::operator ()(double a,double b,double eps, int N) const {
 	vector<struct info> infostack;
 	struct info tmp;
@@ -25,7 +27,9 @@ double AdapSimps::operator ()(double a,double b,double eps, int N) const {
 	while (!infostack.empty()) {
 		++cnt;
 		tmp = infostack.back();
-		cout<<"tmp.L = "<<tmp.L<<", tmp.TOL = "<<tmp.TOL<<endl;
+		#ifdef DEUBG
+			cout<<"tmp.L = "<<tmp.L<<", tmp.TOL = "<<tmp.TOL<<endl;
+		#endif
 		infostack.pop_back();
 		if (cnt == 1) {
 			assert(infostack.empty());
@@ -36,10 +40,14 @@ double AdapSimps::operator ()(double a,double b,double eps, int N) const {
 		double S1 = tmp.h*(tmp.F[0] + 4*FD + tmp.F[1])/6;
 		double S2 = tmp.h*(tmp.F[1] + 4*FE + tmp.F[2])/6;
 
-		cout<<"level = "<<tmp.L<<", S1, S2, and tmp.S: "<<S1<<" "<<S2<<" "<<tmp.S<<endl;		
+		#ifdef DEUBG
+			cout<<"level = "<<tmp.L<<", S1, S2, and tmp.S: "<<S1<<" "<<S2<<" "<<tmp.S<<endl;		
+		#endif
 		if (abs(S1 + S2 - tmp.S) < tmp.TOL) {
 			result += (S1 + S2);
-			cout<<"level = "<<tmp.L<<", result = "<< result<<endl;
+			#ifdef DEUBG
+				cout<<"level = "<<tmp.L<<", result = "<< result<<endl;
+			#endif
 		} else {
 			if (tmp.L < N) {
 				tmp2.a = tmp.a + tmp.h;
@@ -62,7 +70,11 @@ double AdapSimps::operator ()(double a,double b,double eps, int N) const {
 				infostack.push_back(tmp2);
 			} else {
 				cout<<"Level exceeded!"<<endl;
-				return 0;
+				result += (S1 + S2);
+				#ifdef DEUBG
+					cout<<"S1: "<<S1<<", S2: "<<S2<<", tmp.S: "<<tmp.S<<", TOL: "<<tmp.TOL<<endl;
+				#endif
+//				return 0;
 			}
 		}
 	}
