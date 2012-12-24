@@ -4,7 +4,7 @@
 #include <assert.h>
 #include "adapsimpsint.h"
 
-double Trapz::operator ()(double a,double b,double eps, int N) const {
+double AdapSimps::operator ()(double a,double b,double eps, int N) const {
 	vector<struct info> infostack;
 	struct info tmp;
 	struct info tmp2;

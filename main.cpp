@@ -1,15 +1,13 @@
-#include <iostream.h>
+#include <iostream>
 #include <iomanip>
-#include <vector.h>
+#include <vector>
 
 #include "adapsimpsint.h"
-#include "xsdata.h"
 
 using namespace std;
 
 int main() {
 	Fun f;
-	Trapz trapz1(f);
-	cout<<"TRAPZ Int:"<<setprecision(7)<<trapz1(0,2,1e-7,20)<<endl;	
-//ŒÆËã²¢Êä³ö»ý·Öœá¹û
+	AdapSimps simpson1(f);
+	cout<<"Adaptive Simpson Int:"<<setprecision(7)<<simpson1(0, 2, 1e-7, 20)<<endl;	
 }

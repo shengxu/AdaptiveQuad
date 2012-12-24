@@ -8,19 +8,17 @@
 #include "parameters.h"
 #include "xsdata.h"
 
-using namespace std;
-
 class F	
 {
 public:
 	virtual double operator ()(double x) const=0;
 };
-//class Fun:public F {
-//public:
-//	double operator()(double x) const {
-//	      return log(1.0+x)/(1.0+x*x);
-//	}
-//};
+class Fun:public F {
+public:
+	double operator()(double x) const {
+	      return log(1.0+x)/(1.0+x*x);
+	}
+};
 class sigv:public F {
 public:
 	int A;
@@ -31,7 +29,7 @@ public:
 	
 	double operator()(double V) const {
 		double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*T);
-		return pow(alpha/CONST::PI, 0.5)*pow(V/v, 2)*exp(-alpha*pow(V-v,2))*interp(xs_v, xs_sig, V, xs_v.size());
+		return (double) std::pow(alpha/CONST::PI, 0.5)*std::pow(V/v, 2)*std::exp(-alpha*std::pow(V-v,2))*interp(xs_v.begin(), xs_sig.begin(), V, xs_v.size());
 	}
 };
 
@@ -41,10 +39,9 @@ public:
 	virtual double operator ()(double a,double b,double eps, int N) const=0;
 };
 
-class Trapz:public Integ
-{
+class AdapSimps:public Integ {
 public:
-	Trapz(const F &pf):f(pf){}
+	AdapSimps(const F &pf) : f(pf) {}
 	double operator ()(double a, double b,double eps, int N) const;
 private:
 	const F &f;

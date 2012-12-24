@@ -1,12 +1,17 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+
 #include "xsdata.h"
-#include "constants.h"
+#include "parameters.h"
 
 using namespace std;
 
-int readxs(const string &filename, vector<double> &xs_E, vector<double> &xs_sig) {
+//vector<double> xs_E;
+//vector<double> xs_v;
+//vector<double> xs_sig;
+
+int isotope::readxs(const string &filename, vector<double> &xs_E, vector<double> &xs_sig) {
 	double E, sig;
 	
 	ifstream infile(filename.c_str());
@@ -31,9 +36,8 @@ int readxs(const string &filename, vector<double> &xs_E, vector<double> &xs_sig)
 	return 0;
 }
 
-void gridEtoV(vector<double> &xs_E, vector<double> &xs_v) {
+void isotope::gridEtoV(vector<double> &xs_E, vector<double> &xs_v) {
 	for (auto it=xs_E.begin(); it<xs_E.end(); it++) {
 		xs_v.push_back(sqrt(2*(*it)*1.e-6/CONST::M_NEUT));
 	}
-
 }

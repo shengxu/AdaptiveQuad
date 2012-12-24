@@ -1,11 +1,17 @@
 #include <iostream>
 #include <cmath>
 
+#include "parameters.h"
 #include "util.h"
 #include "xsdata.h"
 
 using namespace std;
 
+// initialize PARAM::T here
+namespace PARAM {
+	double T = 300;
+}
+	
 #include <algorithm>
 
 //template <typename T1, typename T2>
@@ -50,17 +56,18 @@ int main(void) {
 	cout<<"sqrt(2) is "<<pow(2, 0.5)<<endl;
 	
 	int r;
+	isotope U238;
 	string xsfile("sample_xs.txt");
-	if ( (r = readxs(xsfile, xs_E, xs_sig)) < 0) {
+	if ( (r = U238.readxs(xsfile, U238.xs_E, U238.xs_sig)) < 0) {
 		cout<<"Error in reading xs file!"<<endl;
 		return r;
 	}
-	gridEtoV(xs_E, xs_v);
+	U238.gridEtoV(U238.xs_E, U238.xs_v);
 
-	cout<<"xs vector size: "<<xs_E.size()<<endl;
+	cout<<"xs vector size: "<<U238.xs_E.size()<<endl;
 	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
-	for (int i=0; i<xs_sig.size(); i++) {
-		cout<<xs_E[i]<<"  "<<xs_v[i]<<"  "<<xs_sig[i]<<endl;
+	for (int i=0; i<U238.xs_sig.size(); i++) {
+		cout<<U238.xs_E[i]<<"  "<<U238.xs_v[i]<<"  "<<U238.xs_sig[i]<<endl;
 	}
 	
 	return 0;

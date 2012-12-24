@@ -8,7 +8,6 @@ CXXFLAGS := -g -Wall -std=c++0x
 LDFLAGS := -lpthread
 
 HEADERS := \
-	constants.h \
 	parameters.h \
 	interp.h \
 	adapsimpsint.h \
@@ -20,9 +19,9 @@ HEADERS := \
 # If you add a new file called "filename.c", you should
 # add "filename.o \" to this list.
 OBJS := \
+	xsdata.o \
 	adapsimpsint.o \
 	main.o \
-	xsdata.o
 
 
 # Blank line ends list.

@@ -4,13 +4,20 @@
 #include <string>
 #include <vector>
 
-using namespace std;
+#include "parameters.h"
 
-static vector<double> xs_E;
-static vector<double> xs_v;
-static vector<double> xs_sig;
+//extern vector<double> xs_E;
+//extern vector<double> xs_v;
+//extern vector<double> xs_sig;
 
-int readxs(const string &filename, vector<double> &xs_E, vector<double> &xs_sig);
-void gridEtoV(vector<double> &xs_E, vector<double> &xs_v);
+class isotope {
+	public:
+		int readxs(const std::string &filename, std::vector<double> &xs_E, std::vector<double> &xs_sig);
+		void gridEtoV(std::vector<double> &xs_E, std::vector<double> &xs_v);
+		
+		std::vector<double> xs_E;
+		std::vector<double> xs_v;
+		std::vector<double> xs_sig;
+};
 
 #endif
