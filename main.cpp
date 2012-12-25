@@ -11,14 +11,15 @@ namespace PARAM {
 	double T = 300;
 }
 
-int main() {
+int main(int argc, char **argv) {
 	Fun f;
 	AdapSimps simpson1(f);
 	cout<<"Adaptive Simpson Int:"<<setprecision(7)<<simpson1(0, 2, 1e-7, 20)<<endl;	
 	
 	int r;
 	isotope U238;
-	string xsfile("pendf_0K_102");
+	string xsfile(argv[0]);
+	// string xsfile("pendf_0K_102");
 	if ( (r = U238.readxs(xsfile, U238.xs_E, U238.xs_sig)) < 0) {
 		cout<<"Error in reading xs file!"<<endl;
 		return r;

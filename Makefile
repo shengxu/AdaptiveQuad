@@ -1,7 +1,11 @@
 TARGETS := adapsimpson
 
-CC := g++
+CC := gcc
 CXX := g++
+ifeq ($(ON_KILKENNY), 1)
+CC := /opt/gcc/4.6.2/bin/gcc
+CXX := /opt/gcc/4.6.2/bin/g++
+endif
 # You can add -Werr to GCC to force all warnings to turn into errors
 CFLAGS := -g -Wall
 CXXFLAGS := -g -Wall -std=c++0x
