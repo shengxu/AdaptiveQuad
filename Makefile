@@ -48,7 +48,7 @@ all: $(TARGETS)
 pintool:
 	$(MAKE) -C pintool
 
-adapsimpson: $(OBJS)
+adapsimpson: $(OBJS) $(HEADERS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 	
 test: xsdata.o test.o

@@ -70,5 +70,7 @@ int main(void) {
 		cout<<U238.xs_E[i]<<"  "<<U238.xs_v[i]<<"  "<<U238.xs_sig[i]<<endl;
 	}
 	
+	
+	cout<<"vmin: "<<PARAM::vmin<<", vmax: "<<PARAM::vmax<<endl;
 	return 0;
 }

@@ -25,6 +25,7 @@ class sigv:public F {
 public:
 	int A;
 	double v;
+	double alpha;
 	std::vector<double> xs_E;
 	std::vector<double> xs_v;
 	std::vector<double> xs_sig;
@@ -32,8 +33,11 @@ public:
 	// constructor
 	sigv(int _A, double _v, std::vector<double> &_xs_E, std::vector<double> &_xs_v, std::vector<double> &_xs_sig) : A(_A), v(_v), xs_E(_xs_E), xs_v(_xs_v), xs_sig(_xs_sig) {}	
 	
+	void setalpha(double T) {
+		alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*T);
+	}
+	
 	double operator()(double V) const {
-		double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);
 		return (double) std::pow(alpha/CONST::PI, 0.5)*std::pow(V/v, 2)*std::exp(-alpha*std::pow(V-v,2))*interp(xs_v.begin(), xs_sig.begin(), V, xs_v.size());
 	}
 };

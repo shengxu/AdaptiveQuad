@@ -7,6 +7,10 @@
 using namespace std;
 
 double AdapSimps::operator ()(double a,double b,double eps, int N) const {
+
+	if (a == b) 
+		return 0;
+		
 	vector<struct info> infostack;
 	struct info tmp;
 	struct info tmp2;
@@ -18,8 +22,9 @@ double AdapSimps::operator ()(double a,double b,double eps, int N) const {
 	tmp.F[0] = f(a);
 	tmp.F[1] = f(a + tmp.h);
 	tmp.F[2] = f(b);
-	tmp.TOL = 10*eps;
 	tmp.S = tmp.h*(tmp.F[0] + 4*tmp.F[1] + tmp.F[2])/3;
+//	tmp.TOL = 10*eps;	
+	tmp.TOL = tmp.S*eps;  // here use eps as upperbound for relative error
 	tmp.L = 1;
 
 	infostack.push_back(tmp);
@@ -69,7 +74,7 @@ double AdapSimps::operator ()(double a,double b,double eps, int N) const {
 	//			tmp2.L = tmp.L + 1;
 				infostack.push_back(tmp2);
 			} else {
-				cout<<"Level exceeded!"<<endl;
+//				cout<<"Level exceeded!"<<endl;
 				result += (S1 + S2);
 				#ifdef DEUBG
 					cout<<"S1: "<<S1<<", S2: "<<S2<<", tmp.S: "<<tmp.S<<", TOL: "<<tmp.TOL<<endl;
@@ -79,6 +84,7 @@ double AdapSimps::operator ()(double a,double b,double eps, int N) const {
 		}
 	}
 
+	cout<<cnt<<"    ";
 	return result;
 }
 //End of file Trapzint.cpp

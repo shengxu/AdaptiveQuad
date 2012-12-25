@@ -35,17 +35,23 @@ int main() {
 	int A = 238;
 	double v = 2.2e3;
 	sigv f2(A, v, U238.xs_E, U238.xs_v, U238.xs_sig);
+//	f2.setalpha(PARAM::T);
 	AdapSimps simpson2(f2);
 	double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);
+	f2.alpha = alpha;
 	double delv = 4./sqrt(alpha);
 	double xs_brdn = 0;
 	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
-	for (int i=0; i < U238.xs_v.size(); i += 100) {
+	for (int i=0; i < U238.xs_v.size(); i += 10) {
 		v = U238.xs_v[i];
 		f2.v = v;
-		xs_brdn = simpson2(v - delv, v + delv, 1e-2, 80);
-		f2.v = -v;
-		xs_brdn -= simpson2(0, delv, 1e-2, 80);
+		xs_brdn = simpson2(max(v - delv, 0.0), v + delv, 1e-3, 80);
+		if (v < delv) {
+			f2.v = -v;
+			xs_brdn -= simpson2(0, delv - v, 1e-3, 80);
+		} else {
+			cout<<"0      ";		
+		}
 		cout<<U238.xs_E[i]<<"  "<<U238.xs_v[i]<<"  "<<xs_brdn<<endl;
 //		cout<<"Broadened xs at 0.025 eV at 300K: "<<xs_brdn<<endl;	
 	}
