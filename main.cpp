@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
 	
 	int r;
 	isotope U238;
-	string xsfile(argv[0]);
+	string xsfile(argv[1]);
 	// string xsfile("pendf_0K_102");
 	if ( (r = U238.readxs(xsfile, U238.xs_E, U238.xs_sig)) < 0) {
 		cout<<"Error in reading xs file!"<<endl;
