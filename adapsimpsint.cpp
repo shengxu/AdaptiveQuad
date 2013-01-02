@@ -6,7 +6,7 @@
 
 using namespace std;
 
-double AdapSimps::operator ()(double a,double b,double eps, int N) const {
+double AdapSimps::operator ()(double a,double b,double eps, int N2) const {
 
 	if (a == b) 
 		return 0;
@@ -17,22 +17,45 @@ double AdapSimps::operator ()(double a,double b,double eps, int N) const {
 	double result = 0;
 	int cnt = 0;
 
-	tmp.a = a;
-	tmp.h = (b-a)/2;
-	tmp.F[0] = f(a);
-	tmp.F[1] = f(a + tmp.h);
-	tmp.F[2] = f(b);
-	tmp.S = tmp.h*(tmp.F[0] + 4*tmp.F[1] + tmp.F[2])/3;
-//	tmp.TOL = 10*eps;	
-	tmp.TOL = tmp.S*eps;  // here use eps as upperbound for relative error
-	tmp.L = 1;
+	#ifdef DEBUG
+		cout<<"a = "<<a<<", b = "<<b<<", intv = "<<b-a<<endl;
+	#endif
 
-	infostack.push_back(tmp);
+//	tmp.a = a;
+//	tmp.h = (b-a)/2;
+//	tmp.F[0] = f(a);
+//	tmp.F[1] = f(a + tmp.h);
+//	tmp.F[2] = f(b);
+//	tmp.S = tmp.h*(tmp.F[0] + 4*tmp.F[1] + tmp.F[2])/3;
+//	//	tmp.TOL = 10*eps;	
+//	tmp.TOL = tmp.S*eps;  // here use eps as upperbound for relative error
+//	tmp.L = 1;
+
+//	infostack.push_back(tmp);
+	
+	int N1 = 3;
+	int Nint = pow(2, N1-1);
+	double intv = (b-a)/Nint;
+	for (int i=0; i < Nint; i++) {	
+		++cnt;
+		tmp.a = a + i*intv;
+		tmp.h = intv/2;
+		tmp.F[0] = f(tmp.a);
+		tmp.F[1] = f(tmp.a + tmp.h);
+		tmp.F[2] = f(tmp.a + 2*tmp.h);
+		tmp.S = tmp.h*(tmp.F[0] + 4*tmp.F[1] + tmp.F[2])/3;
+		//	tmp.TOL = 10*eps;	
+		tmp.TOL = tmp.S*eps;  // here use eps as upperbound for relative error
+		tmp.L = 1;
+
+		infostack.push_back(tmp);		
+	}
+
 
 	while (!infostack.empty()) {
 		++cnt;
 		tmp = infostack.back();
-		#ifdef DEUBG
+		#ifdef DEBUG
 			cout<<"tmp.L = "<<tmp.L<<", tmp.TOL = "<<tmp.TOL<<endl;
 		#endif
 		infostack.pop_back();
@@ -45,16 +68,16 @@ double AdapSimps::operator ()(double a,double b,double eps, int N) const {
 		double S1 = tmp.h*(tmp.F[0] + 4*FD + tmp.F[1])/6;
 		double S2 = tmp.h*(tmp.F[1] + 4*FE + tmp.F[2])/6;
 
-		#ifdef DEUBG
-			cout<<"level = "<<tmp.L<<", S1, S2, and tmp.S: "<<S1<<" "<<S2<<" "<<tmp.S<<endl;		
-		#endif
 		if (abs(S1 + S2 - tmp.S) < tmp.TOL) {
 			result += (S1 + S2);
-			#ifdef DEUBG
-				cout<<"level = "<<tmp.L<<", result = "<< result<<endl;
-			#endif
+		#ifdef DEBUG
+			cout<<"level = "<<tmp.L<<", S1, S2, and tmp.S: "<<S1<<" "<<S2<<" "<<tmp.S<<" Passed the test!"<<endl;		
+		#endif			
 		} else {
-			if (tmp.L < N) {
+		#ifdef DEBUG
+			cout<<"level = "<<tmp.L<<", S1, S2, and tmp.S: "<<S1<<" "<<S2<<" "<<tmp.S<<" Didn't pass the test...."<<endl;		
+		#endif		
+			if (tmp.L < N2) {
 				tmp2.a = tmp.a + tmp.h;
 				tmp2.F[0] = tmp.F[1];
 				tmp2.F[1] = FE;
@@ -74,10 +97,11 @@ double AdapSimps::operator ()(double a,double b,double eps, int N) const {
 	//			tmp2.L = tmp.L + 1;
 				infostack.push_back(tmp2);
 			} else {
-//				cout<<"Level exceeded!"<<endl;
 				result += (S1 + S2);
-				#ifdef DEUBG
-					cout<<"S1: "<<S1<<", S2: "<<S2<<", tmp.S: "<<tmp.S<<", TOL: "<<tmp.TOL<<endl;
+				#ifdef DEBUG
+					cout<<"Level exceeded!"<<endl;
+					cout<<"S1: "<<S1<<", S2: "<<S2<<", tmp.S: "<<tmp.S<<", result: "<<result<<", TOL: "<<tmp.TOL<<endl;
+					cout<<"a = "<<tmp.a<<", b = "<<tmp.a + 2*tmp.h<<", intv = "<<2*tmp.h<<endl;
 				#endif
 //				return 0;
 			}

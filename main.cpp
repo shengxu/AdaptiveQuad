@@ -14,7 +14,7 @@ namespace PARAM {
 int main(int argc, char **argv) {
 	Fun f;
 	AdapSimps simpson1(f);
-	cout<<"Adaptive Simpson Int:"<<setprecision(7)<<simpson1(0, 2, 1e-7, 20)<<endl;	
+	cout<<"Adaptive Simpson Int:"<<simpson1(0, 2, 1e-7, 20)<<endl;	
 	
 	int r;
 	isotope U238;
@@ -43,17 +43,35 @@ int main(int argc, char **argv) {
 	double delv = 4./sqrt(alpha);
 	double xs_brdn = 0;
 	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
-	for (int i=0; i < U238.xs_v.size(); i += 10) {
+//	for (int i=0; i < U238.xs_v.size(); i += 10) {
+	for (int i=530920; i == 530920; i += 10) {
+		cout<<"i = "<<i<<endl;
 		v = U238.xs_v[i];
 		f2.v = v;
-		xs_brdn = simpson2(max(v - delv, 0.0), v + delv, 1e-3, 80);
+		cout<<"v = "<<v<<", delv = "<<delv<<endl;
+		xs_brdn = simpson2(max(v - delv, 0.0), v + delv, 1e-3, 10);
 		if (v < delv) {
 			f2.v = -v;
-			xs_brdn -= simpson2(0, delv - v, 1e-3, 80);
+			xs_brdn -= simpson2(0, delv - v, 1e-3, 10);
 		} else {
 			cout<<"0      ";		
 		}
 		cout<<U238.xs_E[i]<<"  "<<U238.xs_v[i]<<"  "<<xs_brdn<<endl;
 //		cout<<"Broadened xs at 0.025 eV at 300K: "<<xs_brdn<<endl;	
 	}
+
+//		int i = 530930;
+//		v = U238.xs_v[i];
+//		f2.v = v;
+//		xs_brdn = simpson2(max(v - delv, 0.0), v + delv, 1e-3, 10);
+//		cout<<"xs_brdn_1 = "<<xs_brdn<<endl;
+//		if (v < delv) {
+//			f2.v = -v;
+//			xs_brdn -= simpson2(0, delv - v, 1e-3, 10);
+//			cout<<"xs_brdn_2 = "<<xs_brdn<<endl;
+//		} else {
+//			cout<<"0      ";		
+//		}
+//		cout<<U238.xs_E[i]<<"  "<<U238.xs_v[i]<<"  "<<xs_brdn<<endl;
+////		cout<<"Broadened xs at 0.025 eV at 300K: "<<xs_brdn<<endl;	
 }
