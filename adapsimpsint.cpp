@@ -21,16 +21,18 @@ double AdapSimps::operator ()(double a,double b,double eps, int N2) const {
 		cout<<"a = "<<a<<", b = "<<b<<", intv = "<<b-a<<endl;
 	#endif
 
-//	tmp.a = a;
-//	tmp.h = (b-a)/2;
-//	tmp.F[0] = f(a);
-//	tmp.F[1] = f(a + tmp.h);
-//	tmp.F[2] = f(b);
-//	tmp.S = tmp.h*(tmp.F[0] + 4*tmp.F[1] + tmp.F[2])/3;
-//	//	tmp.TOL = 10*eps;	
-//	tmp.TOL = tmp.S*eps;  // here use eps as upperbound for relative error
-//	tmp.L = 1;
-
+	tmp.a = a;
+	tmp.h = (b-a)/2;
+	tmp.F[0] = f(a);
+	tmp.F[1] = f(a + tmp.h);
+	tmp.F[2] = f(b);
+	tmp.S = tmp.h*(tmp.F[0] + 4*tmp.F[1] + tmp.F[2])/3;
+	//	tmp.TOL = 10*eps;	
+	double TOL = tmp.S*eps;  // here use eps as upperbound for relative error
+	#ifdef DEBUG
+		cout<<"tmp.S = "<<tmp.S<<"F[0:2]:"<<tmp.F[0]<<", "<<tmp.F[1]<<", "<<tmp.F[2]<<endl;
+	#endif
+	
 //	infostack.push_back(tmp);
 	
 	int N1 = 3;
@@ -42,11 +44,15 @@ double AdapSimps::operator ()(double a,double b,double eps, int N2) const {
 		tmp.h = intv/2;
 		tmp.F[0] = f(tmp.a);
 		tmp.F[1] = f(tmp.a + tmp.h);
-		tmp.F[2] = f(tmp.a + 2*tmp.h);
+		tmp.F[2] = f(tmp.a + intv);
 		tmp.S = tmp.h*(tmp.F[0] + 4*tmp.F[1] + tmp.F[2])/3;
 		//	tmp.TOL = 10*eps;	
-		tmp.TOL = tmp.S*eps;  // here use eps as upperbound for relative error
+		tmp.TOL = TOL/Nint;  // here use eps as upperbound for relative error
 		tmp.L = 1;
+		#ifdef DEBUG
+			cout<<"a + tmp.h = "<<a + (b-a)/2<<"tmp.a + intv = "<<tmp.a + intv<<endl;
+			cout<<"i = "<<i<<", tmp.S = "<<tmp.S<<"F[0:2]:"<<tmp.F[0]<<", "<<tmp.F[1]<<", "<<tmp.F[2]<<endl;
+		#endif
 
 		infostack.push_back(tmp);		
 	}
