@@ -17,6 +17,7 @@ namespace CONST {
 	//real(8), parameter:: ZERO = 0.0_8
 	//real(8), parameter:: ONE = 1.0_8
 	const double PI = 3.1415926535898;
+	const double SQRT_PI = std::sqrt(PI);
 	const double K_BOLTZMANN = 8.617342e-11;     // unit: MeV/K
 	const double M_NEUT = 939.565378/std::pow(3.0e+8, 2);  //unit: MeV/((m/s)^2)
 	const double M_NUCLEON = 931.494061/std::pow(3.0e+8, 2);  //unit: MeV/((m/s)^2)

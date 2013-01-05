@@ -1,9 +1,12 @@
 #include <iostream>
+#include <fstream>
 #include <cmath>
+#include <random>
 
 #include "parameters.h"
 #include "util.h"
 #include "xsdata.h"
+#include "productcdf.h"
 
 using namespace std;
 
@@ -55,22 +58,55 @@ int main(void) {
 	cout<<"PI is "<<M_PI<<endl;
 	cout<<"sqrt(2) is "<<pow(2, 0.5)<<endl;
 	
-	int r;
-	isotope U238;
-	string xsfile("sample_xs.txt");
-	if ( (r = U238.readxs(xsfile, U238.xs_E, U238.xs_sig)) < 0) {
-		cout<<"Error in reading xs file!"<<endl;
-		return r;
-	}
-	U238.gridEtoV(U238.xs_E, U238.xs_v);
+//	int r;
+//	isotope U238;
+//	string xsfile("sample_xs.txt");
+//	if ( (r = U238.readxs(xsfile, U238.xs_E, U238.xs_sig)) < 0) {
+//		cout<<"Error in reading xs file!"<<endl;
+//		return r;
+//	}
+//	U238.gridEtoV(U238.xs_E, U238.xs_v);
 
-	cout<<"xs vector size: "<<U238.xs_E.size()<<endl;
-	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
-	for (int i=0; i<U238.xs_sig.size(); i++) {
-		cout<<U238.xs_E[i]<<"  "<<U238.xs_v[i]<<"  "<<U238.xs_sig[i]<<endl;
+//	cout<<"xs vector size: "<<U238.xs_E.size()<<endl;
+//	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
+//	for (int i=0; i<U238.xs_sig.size(); i++) {
+//		cout<<U238.xs_E[i]<<"  "<<U238.xs_v[i]<<"  "<<U238.xs_sig[i]<<endl;
+//	}
+//	
+//	
+//	cout<<"vmin: "<<PARAM::vmin<<", vmax: "<<PARAM::vmax<<endl;
+
+	double alpha = 238*CONST::M_NUCLEON/2/CONST::K_BOLTZMANN/PARAM::T;
+	CDFmuvt cdf238(alpha);
+	CDFMB cdfMB(alpha);
+	const double LIMIT = 500;
+	const double INTVL = 1;
+	for (int i=0; i < 2*LIMIT/INTVL; i++) {
+		cdf238.grid.push_back(-LIMIT + i*INTVL);
+		cdfMB.grid.push_back(-LIMIT + i*INTVL);
+	}
+	cdf238.setcdf();
+	cdfMB.setcdf();
+	ofstream outfile("sample_cdf.out");
+//	ofstream outfile4("sample_cdfMB.out");
+	for (auto it = cdf238.cdf.begin(); it != cdf238.cdf.end(); it++) {
+		outfile<<*it<<endl;
 	}
 	
+	default_random_engine e;
+	uniform_real_distribution<double> u(0,1);
+	ofstream outfile2("muvt_dist.out");	
+	ofstream outfile3("mu_vt_dist.out");
 	
-	cout<<"vmin: "<<PARAM::vmin<<", vmax: "<<PARAM::vmax<<endl;
+	for (auto i = 0; i < 100000; i++) {
+//		cout<<u(e)<<" ";
+		outfile2<<cdf238.getx(u(e))<<endl;
+	}
+	
+	for (auto i = 0; i < 100000; i++) {
+		double vt = cdfMB.getx(u(e));
+		double mu = 2*u(e) - 1;
+		outfile3<<vt*mu<<endl;
+	}
 	return 0;
 }
