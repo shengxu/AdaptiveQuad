@@ -1,3 +1,10 @@
 # executables
 test
 adapsimpson
+adaprandom
+
+# data files
+*.out
+
+# matlab files
+*.fig

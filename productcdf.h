@@ -12,7 +12,7 @@ class CDFmuvt {
 		
 		CDFmuvt(const double _alpha) : alpha(_alpha) {}
 		void setcdf();
-		double getx(double cdfin);
+		double getx(double cdfin) const;
 };
 
 

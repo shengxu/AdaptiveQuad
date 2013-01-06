@@ -35,7 +35,7 @@ void CDFmuvt::setcdf() {
 	}
 }
 
-double CDFmuvt::getx(double cdfin) {
+double CDFmuvt::getx(double cdfin) const {
 //	const std::vector<double>::iterator it = std::lower_bound(cdf.begin(), cdf.end(), cdfin);
 //	unsigned int ind = it - cdf.begin();
 //	return grid[ind] + (cdfin - cdf[ind])*(cdf[ind+1] - cdf[ind])/(grid[ind+1] - grid[ind]);
