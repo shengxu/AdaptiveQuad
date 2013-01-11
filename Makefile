@@ -1,4 +1,4 @@
-TARGETS := adapsimpson adaprandom
+TARGETS := adapsimpson adaprandom semi_random
 
 CC := gcc
 CXX := g++
@@ -60,6 +60,9 @@ adapsimpson: $(OBJS) main.o $(HEADERS)
 adaprandom: $(OBJS) main_random.o $(HEADERS)
 	$(CXX) $(OBJS) main_random.o -o $@ $(LDFLAGS)
 	
+semi_random: $(OBJS) semi_random.o $(HEADERS)
+	$(CXX) $(OBJS) semi_random.o -o $@ $(LDFLAGS)
+
 test: xsdata.o productcdf.o test.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
