@@ -21,6 +21,7 @@ static inline double E2v(double E) {
 double adaprandomint(double E, const CDFmuvt & cdf, const std::vector<double> &xs_E, const std::vector<double> &xs_sig, double eps) {
 
 	size_t cnt = 0;
+	bool stat = false;
 //	double Erel = 0;
 	double xs_brdn = 0;
 	double xs_brdn_p;
@@ -32,7 +33,7 @@ double adaprandomint(double E, const CDFmuvt & cdf, const std::vector<double> &x
 	#endif
 	
 	// initial evaluation
-	int L0 = 5;
+	int L0 = 2;
 	int N0 = std::pow(2, L0);
 	double intv = 1.0/N0;
 
@@ -65,15 +66,23 @@ double adaprandomint(double E, const CDFmuvt & cdf, const std::vector<double> &x
 			#endif
 			cnt++;
 		}
-		xs_brdn /= (2*N0 - 1);
-		if (abs((xs_brdn - xs_brdn_p)/(xs_brdn + PARAM::eps)) < eps || L0 >= NMAX) {
+		if (L0 >= NMAX) {
 			cout<<cnt<<"       ";
 			return xs_brdn/v;
 		} else {
-			xs_brdn_p = xs_brdn;
-			N0 *= 2;
-			intv /= 2;			
-			L0++;
+			xs_brdn /= (2*N0 - 1);
+			if (abs((xs_brdn - xs_brdn_p)/(xs_brdn + PARAM::eps)) < eps) {
+				if (stat) {
+					cout<<cnt<<"       ";
+					return xs_brdn/v;
+				}  else {
+					stat = true;
+				}
+			}
 		}
+		xs_brdn_p = xs_brdn;
+		N0 *= 2;
+		intv /= 2;
+		L0++;
 	}
 }

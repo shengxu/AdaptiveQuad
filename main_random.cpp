@@ -39,10 +39,10 @@ int main(int argc, char **argv) {
 	
 	double xs_brdn = 0;
 //	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
-//	for (unsigned int i=100; i < U238.xs_E.size(); i += 10) {
+	for (unsigned int i=100; i < U238.xs_E.size(); i += 10) {
 //	for (unsigned int i=100; i <= 20000; i += 10) {
 //	for (unsigned int i=19960; i <= 19960; i += 10) {
-	for (unsigned int i=0; i <= 100; i += 10) {
+//	for (unsigned int i=0; i <= 100; i += 10) {
 		xs_brdn = adaprandomint(U238.xs_E[i], cdf238, U238.xs_E, U238.xs_sig, 1e-3);
 		cout<<U238.xs_E[i]<<"  "<<U238.xs_v[i]<<"  "<<xs_brdn<<endl;
 //		cout<<"Broadened xs at 0.025 eV at 300K: "<<xs_brdn<<endl;	
