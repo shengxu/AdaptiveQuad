@@ -28,16 +28,17 @@ int main(int argc, char **argv) {
 	U238.gridEtoV(U238.xs_E, U238.xs_v);
 	
 	int A = 238;
-	double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);
-	double sqalpha = sqrt(alpha);
+	double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);  // alpha, as used in cullen's method
+	double sqalpha = sqrt(alpha);   // square root of alpha
 	double delv = 4./sqrt(alpha);
+	double vpsq = 1/alpha;  // square of most probable velocity
+//	cout<<"vpsq = "<<vpsq<<endl;
 	double xs_brdn;
 	double cdf_p, cdf;
 	double muvt, xs_ave, vave;
 	
 //	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
-//	for (unsigned int i=0; i < U238.xs_v.size(); i += 10) {
-	for (unsigned int i = 140; i < U238.xs_v.size(); i += 10) {
+	for (unsigned int i = 0; i < U238.xs_v.size(); i += 10) {
 //	for (unsigned int i = 140; i < 2000; i += 10) {
 //	for (unsigned int i = 640; i == 640; i += 10) {
 //		cout<<"i = "<<i<<endl;
@@ -47,8 +48,11 @@ int main(int argc, char **argv) {
 //		cout<<"indl = "<<indl<<", indu = "<<indu<<endl;
 		xs_brdn= 0;
 		cdf_p = 0;
+		double vT_over_v = vpsq/pow(U238.xs_v[i], 2);
 		for (int j=indl; j <= indu; j++) {
-			muvt = U238.xs_v[i]*(sqrt(U238.xs_E[j]/U238.xs_E[i]) - 1);
+//			muvt = U238.xs_v[i]*(sqrt(U238.xs_E[j]/U238.xs_E[i]) - 1);
+			muvt = U238.xs_v[i]*(2./3. - 8./(9.*U238.xs_E[j]/U238.xs_E[i] + 3.));
+//			muvt = 0.5*U238.xs_v[i]*(U238.xs_E[j]/U238.xs_E[i] - vT_over_v - 1);
 //			muvt = 0.5*U238.xs_v[i]*(sqrt(2*U238.xs_E[j]/U238.xs_E[i] - 1) - 1);
 			cdf = 0.5*(1 + erf(sqalpha*muvt));
 //			xs_brdn += U238.xs_sig[j] * (cdf - cdf_p) * U238.xs_v[j]/U238.xs_v[i];
