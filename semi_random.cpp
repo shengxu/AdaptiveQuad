@@ -21,6 +21,11 @@ int main(int argc, char **argv) {
 	isotope U238;
 	string xsfile(argv[1]);
 	// string xsfile("pendf_0K_102");
+	
+	
+	// set the precision of output
+	cout<<setprecision(15);
+
 	if ( (r = U238.readxs(xsfile, U238.xs_E, U238.xs_sig)) < 0) {
 		cout<<"Error in reading xs file!"<<endl;
 		return r;
@@ -38,6 +43,11 @@ int main(int argc, char **argv) {
 	double muvt, xs_ave, vave;
 	
 //	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
+
+//	for (unsigned int i = 800000; i < U238.xs_v.size(); i++) {
+//		U238.xs_sig[i] *= 10;
+//	}
+	
 	for (unsigned int i = 0; i < U238.xs_v.size(); i += 10) {
 //	for (unsigned int i = 140; i < 2000; i += 10) {
 //	for (unsigned int i = 640; i == 640; i += 10) {
