@@ -1,4 +1,4 @@
-TARGETS := adapsimpson adaprandom semi_random
+TARGETS := adapsimpson adaprandom semi_random test
 
 CC := gcc
 CXX := g++
@@ -29,13 +29,18 @@ OBJS := \
 	adaprandom.o \
 	productcdf.o \
 
+TOBJS := \
+	main.o \
+	main_random.o \
+	semi_random.o \
+	test.o \
 
 # Blank line ends list.
 
 OLDMODE := $(shell cat .buildmode 2> /dev/null)
 ifeq ($(DEBUG),1)
-CFLAGS := -DDEBUG -O0 $(CFLAGS)
-CXXFLAGS := -DDEBUG -O0 $(CXXFLAGS)
+CFLAGS := -DDEBUG -g -O0 $(CFLAGS)
+CXXFLAGS := -DDEBUG -g -O0 $(CXXFLAGS)
 ifneq ($(OLDMODE),debug)
 $(shell echo debug > .buildmode)
 endif
@@ -78,4 +83,4 @@ test: xsdata.o productcdf.o test.o
 neat:
 	$(RM) $(OBJS) test.o *.std*
 clean:
-	$(RM) $(TARGETS) $(OBJS) test.o test *.std* .buildmode
+	$(RM) $(TARGETS) $(OBJS) $(TOBJS) *.std* .buildmode

@@ -15,7 +15,49 @@ namespace PARAM {
 	double T = 300;
 }
 
+
+namespace {
+	// build erf table
+	const int NERF = 12001;
+	const double ULIMIT = 6.;
+	const double INTERF = 2*ULIMIT/(NERF-1);
+	double *erftb = new double[NERF];
+}
+
+inline void seterftb () {
+	for (int i=0; i<NERF; i++) {
+		erftb[i] =  erf(INTERF * i - ULIMIT);
+	}
+}
+
+inline double myerf(double x) {
+	int ind;
+	double result;
+	
+	if (x >= -ULIMIT && x <= ULIMIT) {
+		ind = (int) ((x + ULIMIT) / INTERF);	
+		result = erftb[ind] + (x + ULIMIT - ind * INTERF) * (erftb[ind+1] - erftb[ind]);
+	} else if (x < -ULIMIT) {
+		result = -1;
+	} else {
+		result = 1;
+	}
+	
+#ifdef DEBUG
+	cout<<"x = "<<x<<", ind = "<<ind<<", result = "<<result<<", ULIMIT = "<<ULIMIT<<endl;
+#endif	
+	
+	return result;
+}
+
 int main(int argc, char **argv) {
+	
+	seterftb();
+//	cout<<"INTERF = "<<INTERF<<endl;
+//	cout<<"INTERF * 5 - ULIMIT = "<<INTERF * 5 - ULIMIT<<endl;
+//	for (int i=580; i < 620; i++) {
+//		cout<<"i, erftb[i]: "<<i<<" "<<erftb[i]<<endl;	
+//	}
 	
 	int r;
 	isotope U238;
@@ -31,6 +73,7 @@ int main(int argc, char **argv) {
 		return r;
 	}
 	U238.gridEtoV(U238.xs_E, U238.xs_v);
+	
 	
 	int A = 238;
 	double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);  // alpha, as used in cullen's method
@@ -64,7 +107,7 @@ int main(int argc, char **argv) {
 			muvt = U238.xs_v[i]*(2./3. - 8./(9.*U238.xs_E[j]/U238.xs_E[i] + 3.));
 //			muvt = 0.5*U238.xs_v[i]*(U238.xs_E[j]/U238.xs_E[i] - vT_over_v - 1);
 //			muvt = 0.5*U238.xs_v[i]*(sqrt(2*U238.xs_E[j]/U238.xs_E[i] - 1) - 1);
-			cdf = 0.5*(1 + erf(sqalpha*muvt));
+			cdf = 0.5*(1 + myerf(sqalpha*muvt));
 //			xs_brdn += U238.xs_sig[j] * (cdf - cdf_p) * U238.xs_v[j]/U238.xs_v[i];
 //			xs_brdn += 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1])* (cdf - cdf_p)* 0.5*(U238.xs_v[j] + U238.xs_v[j-1])/U238.xs_v[i];
 			xs_ave = 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1]);
@@ -79,5 +122,7 @@ int main(int argc, char **argv) {
 		cout<<U238.xs_E[i]<<"  "<<U238.xs_v[i]<<"  "<<xs_brdn<<"  "<<indu - indl + 1<<endl;
 //		cout<<"Broadened xs at 0.025 eV at 300K: "<<xs_brdn<<endl;	
 	}
+	
+	delete [] erftb;
 
 }
