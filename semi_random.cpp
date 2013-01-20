@@ -18,7 +18,7 @@ namespace PARAM {
 
 namespace {
 	// build erf table
-	const int NERF = 12001;
+	const int NERF = 120001;
 	const double ULIMIT = 6.;
 	const double INTERF = 2*ULIMIT/(NERF-1);
 	double *erftb = new double[NERF];
@@ -107,7 +107,11 @@ int main(int argc, char **argv) {
 			muvt = U238.xs_v[i]*(2./3. - 8./(9.*U238.xs_E[j]/U238.xs_E[i] + 3.));
 //			muvt = 0.5*U238.xs_v[i]*(U238.xs_E[j]/U238.xs_E[i] - vT_over_v - 1);
 //			muvt = 0.5*U238.xs_v[i]*(sqrt(2*U238.xs_E[j]/U238.xs_E[i] - 1) - 1);
+#ifdef MYERF
 			cdf = 0.5*(1 + myerf(sqalpha*muvt));
+#else
+			cdf = 0.5*(1 + erf(sqalpha*muvt));
+#endif			
 //			xs_brdn += U238.xs_sig[j] * (cdf - cdf_p) * U238.xs_v[j]/U238.xs_v[i];
 //			xs_brdn += 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1])* (cdf - cdf_p)* 0.5*(U238.xs_v[j] + U238.xs_v[j-1])/U238.xs_v[i];
 			xs_ave = 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1]);

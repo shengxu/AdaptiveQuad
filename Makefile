@@ -52,6 +52,10 @@ $(shell echo nodebug > .buildmode)
 endif
 endif
 
+ifeq ($(MYERF), 1)
+CXXFLAGS += -DMYERF
+endif
+
 # make all targets specified
 all: $(TARGETS)
 
