@@ -24,10 +24,14 @@ namespace {
 	double *erftb = new double[NERF];
 }
 
-inline void seterftb () {
+void seterftb() {
 	for (int i=0; i<NERF; i++) {
 		erftb[i] =  erf(INTERF * i - ULIMIT);
 	}
+}
+
+void delerftb() {
+	delete [] erftb;
 }
 
 inline double myerf(double x) {
@@ -51,8 +55,10 @@ inline double myerf(double x) {
 }
 
 int main(int argc, char **argv) {
-	
+
+#ifdef MYERF	
 	seterftb();
+#endif
 //	cout<<"INTERF = "<<INTERF<<endl;
 //	cout<<"INTERF * 5 - ULIMIT = "<<INTERF * 5 - ULIMIT<<endl;
 //	for (int i=580; i < 620; i++) {
@@ -127,6 +133,8 @@ int main(int argc, char **argv) {
 //		cout<<"Broadened xs at 0.025 eV at 300K: "<<xs_brdn<<endl;	
 	}
 	
-	delete [] erftb;
+#ifdef MYERF	
+	delerftb();
+#endif	
 
 }
