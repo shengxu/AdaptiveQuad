@@ -41,3 +41,44 @@ void isotope::gridEtoV(vector<double> &xs_E, vector<double> &xs_v) {
 		xs_v.push_back(sqrt(2*(*it)*1.e-6/CONST::M_NEUT));
 	}
 }
+
+void isotope::refinemesh(const double delE, const double relxs, vector<double> &xs_E_ref, vector<double> &xs_sig_ref) {
+//	xs_E_ref.push_back(xs_E[0]);
+//	xs_sig_ref.push_back(xs_sig[0]);
+//	int j = 0;   // to record last index pushed
+//	double E_ave = xs_E[0];        // to record average energy
+//	double sig_ave = xs_sig[0];    // to record average xs
+//	
+//	for (int i = 1; i < xs_sig.size(); i++) {
+//		if (abs(xs_sig[i] - xs_sig[j])/xs_sig[j] <= relxs 
+//				&& abs(xs_E[i] - xs_E[j]) <= delE) {
+//			E_ave += xs_E[i];
+//			sig_ave += xs_sig[i];
+//		} else {
+//			int k = i - j;
+//			sig_ave /= k;
+//			xs_sig_ref.push_back(sig_ave);
+//			E_ave /= k;
+//			xs_E_ref.push_back(E_ave);
+//			j = i;
+//			E_ave = xs_E[i];
+//			sig_ave = xs_sig[i];
+//		}
+//	}
+
+	xs_E_ref.push_back(xs_E[0]);
+	xs_sig_ref.push_back(xs_sig[0]);
+	int j = 0;
+	
+	for (unsigned int i = 1; i < xs_sig.size(); i++) {
+		if (abs(xs_sig[i] - xs_sig[j])/xs_sig[j] <= relxs 
+				&& abs(xs_E[i] - xs_E[j]) <= delE) {
+			i++;
+		} else {
+			xs_E_ref.push_back(xs_E[i]);
+			xs_sig_ref.push_back(xs_sig[i]);
+			j = i;
+		}
+	}
+	
+}

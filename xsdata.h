@@ -14,6 +14,7 @@ class isotope {
 	public:
 		int readxs(const std::string &filename, std::vector<double> &xs_E, std::vector<double> &xs_sig);
 		void gridEtoV(std::vector<double> &xs_E, std::vector<double> &xs_v);
+		void refinemesh(const double delE, const double relxs, std::vector<double> &xs_E_ref, std::vector<double> &xs_sig_ref);
 		
 		std::vector<double> xs_E;
 		std::vector<double> xs_v;

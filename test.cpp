@@ -85,7 +85,7 @@ void delerftv() {
 	delete [] erftb;
 }
 
-int main(void) {
+int main(int argc, char **argv) {
 
 //	double x[6] = {0, 1, 2, 3, 4, 5};
 //	double y[6] = {0, 2, 4, 6, 8, 10};
@@ -100,25 +100,31 @@ int main(void) {
 //	cout<<"PI is "<<M_PI<<endl;
 //	cout<<"sqrt(2) is "<<pow(2, 0.5)<<endl;
 //	
-////	int r;
-////	isotope U238;
-////	string xsfile("sample_xs.txt");
-////	if ( (r = U238.readxs(xsfile, U238.xs_E, U238.xs_sig)) < 0) {
-////		cout<<"Error in reading xs file!"<<endl;
-////		return r;
-////	}
+
+//	int r;
+//	isotope U238;
+//	string xsfile(argv[1]);
+//	if ( (r = U238.readxs(xsfile, U238.xs_E, U238.xs_sig)) < 0) {
+//		cout<<"Error in reading xs file!"<<endl;
+//		return r;
+//	}
 ////	U238.gridEtoV(U238.xs_E, U238.xs_v);
 
-////	cout<<"xs vector size: "<<U238.xs_E.size()<<endl;
-////	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
-////	for (int i=0; i<U238.xs_sig.size(); i++) {
-////		cout<<U238.xs_E[i]<<"  "<<U238.xs_v[i]<<"  "<<U238.xs_sig[i]<<endl;
-////	}
-////	
-////	
-////	cout<<"vmin: "<<PARAM::vmin<<", vmax: "<<PARAM::vmax<<endl;
+//	cout<<"xs vector size: "<<U238.xs_E.size()<<endl;
+//	vector<double> xs_E_ref, xs_sig_ref;
+//	U238.refinemesh(0.05, 0.01, xs_E_ref, xs_sig_ref);
+//	cout<<"refined xs vector size: "<<xs_E_ref.size()<<endl; 
 
-//	double alpha = 238*CONST::M_NUCLEON/2/CONST::K_BOLTZMANN/PARAM::T;
+//	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
+//	for (int i=0; i<U238.xs_sig.size(); i++) {
+//		cout<<U238.xs_E[i]<<"  "<<U238.xs_v[i]<<"  "<<U238.xs_sig[i]<<endl;
+//	}
+
+//	cout<<"vmin: "<<PARAM::vmin<<", vmax: "<<PARAM::vmax<<endl;
+
+	double alpha = 238*CONST::M_NUCLEON/2/CONST::K_BOLTZMANN/PARAM::T;
+	double sqalpha = sqrt(alpha);   // square root of alpha
+	cout<<"sqalpha = "<<sqalpha<<endl;
 //	CDFmuvt cdf238(alpha);
 //	CDFMB cdfMB(alpha);
 //	const double LIMIT = 500;
@@ -151,22 +157,26 @@ int main(void) {
 //		outfile3<<vt*mu<<endl;
 //	}
 	
-	seterftb();
 	
-	ofstream outfile("erftable_test.out");	
-	outfile<<setprecision(15);
-		
-	default_random_engine e;
-	normal_distribution<double> u(0, 3);
-	multimap<double, double> erfout;
-	for (auto i = 0; i < 100000; i++) {
-		double rnd = u(e);
-		erfout.insert(pair<double, double>(rnd, myerf(rnd)));
-	}
+//	// test pre-built erf table
+//	seterftb();
+//	
+//	ofstream outfile("erftable_test.out");	
+//	outfile<<setprecision(15);
+//		
+//	default_random_engine e;
+//	normal_distribution<double> u(0, 3);
+//	multimap<double, double> erfout;
+//	for (auto i = 0; i < 100000; i++) {
+//		double rnd = u(e);
+//		erfout.insert(pair<double, double>(rnd, myerf(rnd)));
+//	}
+//	
+//	for (multimap<double, double>::iterator it=erfout.begin(); it!=erfout.end(); ++it)
+//    outfile << (*it).first << "   " << (*it).second << '\n';
+//    
+//	delerftv();
 	
-	for (multimap<double, double>::iterator it=erfout.begin(); it!=erfout.end(); ++it)
-    outfile << (*it).first << "   " << (*it).second << '\n';
-    
-	delerftv();
+	
 	return 0;
 }
