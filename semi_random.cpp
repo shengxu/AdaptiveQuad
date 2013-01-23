@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <cmath>
 #include <vector>
@@ -59,6 +60,24 @@ int main(int argc, char **argv) {
 #ifdef MYERF	
 	seterftb();
 #endif
+
+	vector<double> erfgrid;
+	vector<double> erfval;
+	double tmp1, tmp2;
+//	double erf_size;
+	ifstream erffile("erf_table.txt");
+	//Always test the file open.
+	if(!erffile) {
+		cerr<<"Error opening erf file"<<endl;
+		return -1;
+	}
+
+	while (erffile>>tmp1>>tmp2){
+		erfgrid.push_back(tmp1);
+		erfval.push_back(tmp2);
+	}
+//	n_erf_intv = erfgrid.size() + 1;
+	
 //	cout<<"INTERF = "<<INTERF<<endl;
 //	cout<<"INTERF * 5 - ULIMIT = "<<INTERF * 5 - ULIMIT<<endl;
 //	for (int i=580; i < 620; i++) {
@@ -90,6 +109,7 @@ int main(int argc, char **argv) {
 	double xs_brdn;
 	double cdf_p, cdf;
 	double muvt, xs_ave, vave;
+	double *E_grid = new double[erfgrid.size()];
 	
 //	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
 
@@ -98,34 +118,67 @@ int main(int argc, char **argv) {
 //	}
 	
 	for (unsigned int i = 0; i < U238.xs_v.size(); i += 10) {
-//	for (unsigned int i = 140; i < 2000; i += 10) {
+//	for (unsigned int i = 500; i < 600; i += 10) {
 //	for (unsigned int i = 640; i == 640; i += 10) {
-//		cout<<"i = "<<i<<endl;
+
+		for (unsigned int k = 0; k < erfgrid.size(); k++) {
+			E_grid[k] = U238.xs_E[i] * (1 + 2.*erfgrid[k]/U238.xs_v[i]/sqalpha);
+//			cout<<E_grid[k]<<endl;
+		}
+	
 //		double El = 0.5*CONST::M_NEUT*pow(U238.xs_v[i] - delv,2), Eu = 0.5*CONST::M_NEUT*pow(U238.xs_v[i] + delv,2);
 		int indl = lower_bound(U238.xs_v.begin(), U238.xs_v.end(), U238.xs_v[i] - delv) - U238.xs_v.begin();
 		int indu = upper_bound(U238.xs_v.begin(), U238.xs_v.end(), U238.xs_v[i] + delv) - U238.xs_v.begin();
-//		cout<<"indl = "<<indl<<", indu = "<<indu<<endl;
+//		cout<<"U238.xs_E[indl] = "<<U238.xs_E[indl]<<", U238.xs_E[indu] = "<<U238.xs_E[indu]<<endl;
 		xs_brdn= 0;
+		xs_ave = 0;
+//		double vT_over_v = vpsq/pow(U238.xs_v[i], 2);
 		cdf_p = 0;
-		double vT_over_v = vpsq/pow(U238.xs_v[i], 2);
-		for (int j=indl; j <= indu; j++) {
-//			muvt = U238.xs_v[i]*(sqrt(U238.xs_E[j]/U238.xs_E[i]) - 1);
-			muvt = U238.xs_v[i]*(2./3. - 8./(9.*U238.xs_E[j]/U238.xs_E[i] + 3.));
-//			muvt = 0.5*U238.xs_v[i]*(U238.xs_E[j]/U238.xs_E[i] - vT_over_v - 1);
-//			muvt = 0.5*U238.xs_v[i]*(sqrt(2*U238.xs_E[j]/U238.xs_E[i] - 1) - 1);
-#ifdef MYERF
-			cdf = 0.5*(1 + myerf(sqalpha*muvt));
-#else
-			cdf = 0.5*(1 + erf(sqalpha*muvt));
-#endif			
-//			xs_brdn += U238.xs_sig[j] * (cdf - cdf_p) * U238.xs_v[j]/U238.xs_v[i];
-//			xs_brdn += 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1])* (cdf - cdf_p)* 0.5*(U238.xs_v[j] + U238.xs_v[j-1])/U238.xs_v[i];
-			xs_ave = 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1]);
-//			vave = sqrt((U238.xs_E[j] + U238.xs_E[j-1])*1.e-6/CONST::M_NEUT);
-//			cout<<"vave = "<<vave<<", U238.xs_v[i] = "<<U238.xs_v[i]<<endl;
-//			xs_brdn += xs_ave * (cdf - cdf_p) * vave/U238.xs_v[i];
-			xs_brdn += xs_ave * (cdf - cdf_p);
-			cdf_p = cdf;
+		double E_p = U238.xs_E[indl];		
+		bool stat = false;
+//		int cnterf = erfgrid.size() + 1;
+		int inderf = 0;
+//		int cntE = 0;
+		for (int j=indl+1; j <= indu; j++) {
+			if (U238.xs_E[j] <= E_grid[inderf]) {
+//				cntE++;
+				xs_ave += 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1])*(U238.xs_E[j] - U238.xs_E[j-1]);
+//				cout<<"xs_ave = "<<xs_ave<<endl;
+				stat = true;
+			} else {
+			
+	//			muvt = U238.xs_v[i]*(sqrt(U238.xs_E[j]/U238.xs_E[i]) - 1);
+				muvt = U238.xs_v[i]*(2./3. - 8./(9.*U238.xs_E[j-1]/U238.xs_E[i] + 3.));
+				if (stat) {
+					xs_ave /= (U238.xs_E[j-1] - E_p);
+					stat = false;
+				} else {
+					xs_ave = 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1]);
+				}
+	//			muvt = 0.5*U238.xs_v[i]*(U238.xs_E[j]/U238.xs_E[i] - vT_over_v - 1);
+	//			muvt = 0.5*U238.xs_v[i]*(sqrt(2*U238.xs_E[j]/U238.xs_E[i] - 1) - 1);
+	//			xs_brdn += U238.xs_sig[j] * (cdf - cdf_p) * U238.xs_v[j]/U238.xs_v[i];
+	//			xs_brdn += 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1])* (cdf - cdf_p)* 0.5*(U238.xs_v[j] + U238.xs_v[j-1])/U238.xs_v[i];
+	//			xs_ave = 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1]);
+			
+	#ifdef MYERF
+				cdf = 0.5*(1 + myerf(sqalpha*muvt));
+	#else
+				cdf = 0.5*(1 + erf(sqalpha*muvt));
+	#endif					
+	//			vave = sqrt((U238.xs_E[j] + U238.xs_E[j-1])*1.e-6/CONST::M_NEUT);
+	//			xs_brdn += xs_ave * (cdf - cdf_p) * vave/U238.xs_v[i];
+				xs_brdn += xs_ave * (cdf - cdf_p);
+				
+//				cout<<"cdf: "<<cdf<<" cdf_p: "<<cdf_p<<endl;
+//				cout<<"E_grid[inderf] = "<< E_grid[inderf]<<", U238.xs_E[j] = "<<U238.xs_E[j]<<endl;
+			
+				// update information
+				E_p = U238.xs_E[j-1];
+				inderf++;
+				cdf_p = cdf;
+				xs_ave = 0;
+			}
 		}
 //		cout<<"v = "<<v<<", delv = "<<delv<<", sig(v) = "<<U238.xs_sig[i]<<endl;
 
