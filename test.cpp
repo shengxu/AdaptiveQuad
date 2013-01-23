@@ -101,19 +101,19 @@ int main(int argc, char **argv) {
 //	cout<<"sqrt(2) is "<<pow(2, 0.5)<<endl;
 //	
 
-//	int r;
-//	isotope U238;
-//	string xsfile(argv[1]);
-//	if ( (r = U238.readxs(xsfile, U238.xs_E, U238.xs_sig)) < 0) {
-//		cout<<"Error in reading xs file!"<<endl;
-//		return r;
-//	}
-////	U238.gridEtoV(U238.xs_E, U238.xs_v);
+	int r;
+	isotope U238;
+	string xsfile(argv[1]);
+	if ( (r = U238.readxs(xsfile, U238.xs_E, U238.xs_sig)) < 0) {
+		cout<<"Error in reading xs file!"<<endl;
+		return r;
+	}
+//	U238.gridEtoV(U238.xs_E, U238.xs_v);
 
-//	cout<<"xs vector size: "<<U238.xs_E.size()<<endl;
-//	vector<double> xs_E_ref, xs_sig_ref;
-//	U238.refinemesh(0.05, 0.01, xs_E_ref, xs_sig_ref);
-//	cout<<"refined xs vector size: "<<xs_E_ref.size()<<endl; 
+	cout<<"xs vector size: "<<U238.xs_E.size()<<endl;
+	vector<double> xs_E_ref, xs_sig_ref;
+	U238.refinemesh(0.02, 0.1, xs_E_ref, xs_sig_ref);
+	cout<<"refined xs vector size: "<<xs_E_ref.size()<<endl; 
 
 //	cout<<"xs_E       "<<"xs_v      "<<"xs_sig       "<<endl;
 //	for (int i=0; i<U238.xs_sig.size(); i++) {

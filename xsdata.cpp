@@ -71,8 +71,8 @@ void isotope::refinemesh(const double delE, const double relxs, vector<double> &
 	int j = 0;
 	
 	for (unsigned int i = 1; i < xs_sig.size(); i++) {
-		if (abs(xs_sig[i] - xs_sig[j])/xs_sig[j] <= relxs 
-				&& abs(xs_E[i] - xs_E[j]) <= delE) {
+		if (abs(xs_sig[i] - xs_sig[j])/xs_sig[j] <= relxs
+				&& abs(xs_E[i] - xs_E[j]) <= delE ) {
 			i++;
 		} else {
 			xs_E_ref.push_back(xs_E[i]);

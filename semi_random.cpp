@@ -72,7 +72,13 @@ int main(int argc, char **argv) {
 		cout<<"Error in reading xs file!"<<endl;
 		return r;
 	}
+	vector<double> xs_E_ref, xs_sig_ref;
+	U238.refinemesh(0.02, 0.02, xs_E_ref, xs_sig_ref);
+	U238.xs_E = xs_E_ref;
+	U238.xs_sig = xs_sig_ref;
 	U238.gridEtoV(U238.xs_E, U238.xs_v);
+	
+	
 	
 	
 	int A = 238;
