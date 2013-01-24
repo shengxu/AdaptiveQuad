@@ -12,7 +12,7 @@ using namespace std;
 
 // initialize PARAM::T here
 namespace PARAM {
-	double T = 300;
+	double T = 600;
 }
 
 
@@ -106,9 +106,15 @@ int main(int argc, char **argv) {
 		int indu = upper_bound(U238.xs_v.begin(), U238.xs_v.end(), U238.xs_v[i] + delv) - U238.xs_v.begin();
 //		cout<<"indl = "<<indl<<", indu = "<<indu<<endl;
 		xs_brdn= 0;
-		cdf_p = 0;
+		
+		muvt = U238.xs_v[i]*(2./3. - 8./(9.*U238.xs_E[indl]/U238.xs_E[i] + 3.));
+#ifdef MYERF
+		cdf_p = 0.5*(1 + myerf(sqalpha*muvt));
+#else
+		cdf_p = 0.5*(1 + erf(sqalpha*muvt));
+#endif
 		double vT_over_v = vpsq/pow(U238.xs_v[i], 2);
-		for (int j=indl; j <= indu; j++) {
+		for (int j=indl+1; j <= indu; j++) {
 //			muvt = U238.xs_v[i]*(sqrt(U238.xs_E[j]/U238.xs_E[i]) - 1);
 			muvt = U238.xs_v[i]*(2./3. - 8./(9.*U238.xs_E[j]/U238.xs_E[i] + 3.));
 //			muvt = 0.5*U238.xs_v[i]*(U238.xs_E[j]/U238.xs_E[i] - vT_over_v - 1);
