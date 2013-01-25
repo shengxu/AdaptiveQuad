@@ -12,7 +12,7 @@ using namespace std;
 
 // initialize PARAM::T here
 namespace PARAM {
-	double T = 300;
+	double T = 600;
 }
 
 
@@ -24,10 +24,14 @@ namespace {
 	double *erftb = new double[NERF];
 }
 
-inline void seterftb () {
+void seterftb() {
 	for (int i=0; i<NERF; i++) {
 		erftb[i] =  erf(INTERF * i - ULIMIT);
 	}
+}
+
+void delerftb() {
+	delete [] erftb;
 }
 
 inline double myerf(double x) {
@@ -51,8 +55,10 @@ inline double myerf(double x) {
 }
 
 int main(int argc, char **argv) {
-	
+
+#ifdef MYERF	
 	seterftb();
+#endif
 //	cout<<"INTERF = "<<INTERF<<endl;
 //	cout<<"INTERF * 5 - ULIMIT = "<<INTERF * 5 - ULIMIT<<endl;
 //	for (int i=580; i < 620; i++) {
@@ -73,12 +79,13 @@ int main(int argc, char **argv) {
 		return r;
 	}
 	vector<double> xs_E_ref, xs_sig_ref;
-	U238.refinemesh(0.02, 0.02, xs_E_ref, xs_sig_ref);
+	U238.refinemesh(atof(argv[2]), atof(argv[3]), xs_E_ref, xs_sig_ref);
+//	cout<<"input parameters: "<<argv[2]<<" "<<argv[3]<<endl;
 	U238.xs_E = xs_E_ref;
 	U238.xs_sig = xs_sig_ref;
 	U238.gridEtoV(U238.xs_E, U238.xs_v);
 	
-	
+//	PARAM::T = atof(argv[4]);
 	
 	
 	int A = 238;
@@ -97,7 +104,8 @@ int main(int argc, char **argv) {
 //		U238.xs_sig[i] *= 10;
 //	}
 	
-	for (unsigned int i = 0; i < U238.xs_v.size(); i += 10) {
+	for (unsigned int i = 0; i < U238.xs_v.size(); i++) {	
+//	for (unsigned int i = 0; i < U238.xs_v.size(); i += 10) {
 //	for (unsigned int i = 140; i < 2000; i += 10) {
 //	for (unsigned int i = 640; i == 640; i += 10) {
 //		cout<<"i = "<<i<<endl;
@@ -106,9 +114,15 @@ int main(int argc, char **argv) {
 		int indu = upper_bound(U238.xs_v.begin(), U238.xs_v.end(), U238.xs_v[i] + delv) - U238.xs_v.begin();
 //		cout<<"indl = "<<indl<<", indu = "<<indu<<endl;
 		xs_brdn= 0;
-		cdf_p = 0;
+		
+		muvt = U238.xs_v[i]*(2./3. - 8./(9.*U238.xs_E[indl]/U238.xs_E[i] + 3.));
+#ifdef MYERF
+		cdf_p = 0.5*(1 + myerf(sqalpha*muvt));
+#else
+		cdf_p = 0.5*(1 + erf(sqalpha*muvt));
+#endif
 		double vT_over_v = vpsq/pow(U238.xs_v[i], 2);
-		for (int j=indl; j <= indu; j++) {
+		for (int j=indl+1; j <= indu; j++) {
 //			muvt = U238.xs_v[i]*(sqrt(U238.xs_E[j]/U238.xs_E[i]) - 1);
 			muvt = U238.xs_v[i]*(2./3. - 8./(9.*U238.xs_E[j]/U238.xs_E[i] + 3.));
 //			muvt = 0.5*U238.xs_v[i]*(U238.xs_E[j]/U238.xs_E[i] - vT_over_v - 1);
@@ -133,6 +147,8 @@ int main(int argc, char **argv) {
 //		cout<<"Broadened xs at 0.025 eV at 300K: "<<xs_brdn<<endl;	
 	}
 	
-	delete [] erftb;
+#ifdef MYERF	
+	delerftb();
+#endif	
 
 }
