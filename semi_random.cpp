@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <cmath>
 #include <vector>
@@ -12,7 +13,7 @@ using namespace std;
 
 // initialize PARAM::T here
 namespace PARAM {
-	double T = 600;
+	double T = 300;
 }
 
 
@@ -64,7 +65,9 @@ int main(int argc, char **argv) {
 //	for (int i=580; i < 620; i++) {
 //		cout<<"i, erftb[i]: "<<i<<" "<<erftb[i]<<endl;	
 //	}
-	
+
+	PARAM::T = atof(argv[4]);
+		
 	int r;
 	isotope U238;
 	string xsfile(argv[1]);
@@ -78,16 +81,20 @@ int main(int argc, char **argv) {
 		cout<<"Error in reading xs file!"<<endl;
 		return r;
 	}
-	vector<double> xs_E_ref, xs_sig_ref;
-	U238.refinemesh(atof(argv[2]), atof(argv[3]), xs_E_ref, xs_sig_ref);
+	vector<double> xs_E_ref, xs_sig_ref, xs_sig_ave;
+	U238.refinemesh(atof(argv[2]), atof(argv[3]), xs_E_ref, xs_sig_ref, xs_sig_ave);
 //	cout<<"input parameters: "<<argv[2]<<" "<<argv[3]<<endl;
 	U238.xs_E = xs_E_ref;
 	U238.xs_sig = xs_sig_ref;
 	U238.gridEtoV(U238.xs_E, U238.xs_v);
 	
-//	PARAM::T = atof(argv[4]);
-	
-	
+//	ofstream outfile("fordebug.out");
+//	outfile<<setprecision(15);
+//	outfile<<"size of xs_E: "<<U238.xs_E.size()<<", size of xs_sig_ave: "<<xs_sig_ave.size()<<endl;
+//	for (auto i=0; i < xs_sig_ave.size(); i++) {
+//		outfile<<U238.xs_E[i]<<"  "<<U238.xs_sig[i]<<"  "<<xs_sig_ave[i]<<endl;
+//	}
+//	
 	int A = 238;
 	double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);  // alpha, as used in cullen's method
 	double sqalpha = sqrt(alpha);   // square root of alpha
@@ -134,7 +141,8 @@ int main(int argc, char **argv) {
 #endif			
 //			xs_brdn += U238.xs_sig[j] * (cdf - cdf_p) * U238.xs_v[j]/U238.xs_v[i];
 //			xs_brdn += 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1])* (cdf - cdf_p)* 0.5*(U238.xs_v[j] + U238.xs_v[j-1])/U238.xs_v[i];
-			xs_ave = 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1]);
+//			xs_ave = 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1]);
+			xs_ave = xs_sig_ave[j-1];
 //			vave = sqrt((U238.xs_E[j] + U238.xs_E[j-1])*1.e-6/CONST::M_NEUT);
 //			cout<<"vave = "<<vave<<", U238.xs_v[i] = "<<U238.xs_v[i]<<endl;
 //			xs_brdn += xs_ave * (cdf - cdf_p) * vave/U238.xs_v[i];
