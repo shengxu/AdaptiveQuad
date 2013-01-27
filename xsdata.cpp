@@ -36,6 +36,8 @@ int isotope::readxs(const string &filename, vector<double> &xs_E, vector<double>
 	return 0;
 }
 
+
+// E in eV
 void isotope::gridEtoV(vector<double> &xs_E, vector<double> &xs_v) {
 	for (auto it=xs_E.begin(); it<xs_E.end(); it++) {
 		xs_v.push_back(sqrt(2*(*it)*1.e-6/CONST::M_NEUT));
