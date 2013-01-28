@@ -82,7 +82,8 @@ int main(int argc, char **argv) {
 		return r;
 	}
 	vector<double> xs_E_ref, xs_sig_ref, xs_sig_ave;
-	U238.refinemesh(atof(argv[2]), atof(argv[3]), xs_E_ref, xs_sig_ref, xs_sig_ave);
+	// input: energy width, xs differencd
+	U238.refinemesh(atof(argv[2]), atof(argv[3]), xs_E_ref, xs_sig_ref, xs_sig_ave);	
 //	cout<<"input parameters: "<<argv[2]<<" "<<argv[3]<<endl;
 	U238.xs_E = xs_E_ref;
 	U238.xs_sig = xs_sig_ref;
@@ -91,22 +92,25 @@ int main(int argc, char **argv) {
 	
 	// sequence of energy points to broaden
 	// uniform in lethargy simulating neutron slowing down with H2O as moderator
-	double Ebegin = 1.9e4;  // 19 KeV
-	double Eend = 1.;    // 1eV
-	double ksi = 0.92;   // of H2O
+	double Ebegin = 2.5e2;  // upper bound to evaluate
+	double Eend = 1.;    // lower bound
+	int Npoints = 100000;  // number of equal-lethargy points
+	double ksi = log(Ebegin/Eend)/Npoints;
 	vector<double> Eseq;
 	while (Ebegin >= Eend) {
 		Eseq.push_back(Ebegin);
 		Ebegin *= exp(-ksi);
 	}
 	
-//	ofstream outfile("fordebug.out");
-//	outfile<<setprecision(15);
-//	outfile<<"size of xs_E: "<<U238.xs_E.size()<<", size of xs_sig_ave: "<<xs_sig_ave.size()<<endl;
-//	for (auto i=0; i < xs_sig_ave.size(); i++) {
-//		outfile<<U238.xs_E[i]<<"  "<<U238.xs_sig[i]<<"  "<<xs_sig_ave[i]<<endl;
-//	}
-//	
+#ifdef DEBUG	
+	ofstream outfile("fordebug.out");
+	outfile<<setprecision(15);
+	outfile<<"size of xs_E: "<<U238.xs_E.size()<<", size of xs_sig_ave: "<<xs_sig_ave.size()<<endl;
+	for (auto i=0; i < xs_sig_ave.size(); i++) {
+		outfile<<U238.xs_E[i]<<"  "<<U238.xs_sig[i]<<"  "<<xs_sig_ave[i]<<endl;
+	}
+#endif
+	
 	int A = 238;
 	double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);  // alpha, as used in cullen's method
 	double sqalpha = sqrt(alpha);   // square root of alpha
@@ -123,9 +127,9 @@ int main(int argc, char **argv) {
 //		U238.xs_sig[i] *= 10;
 //	}
 
-#ifdef DEBUG
-		ofstream outfile2("fordebug.out");
-#endif			
+//#ifdef DEBUG
+//		ofstream outfile2("fordebug.out");
+//#endif			
 
 	for (auto it=Eseq.begin(); it != Eseq.end(); it++) {
 //	for (unsigned int i = 0; i < U238.xs_v.size(); i++) {	
@@ -143,10 +147,10 @@ int main(int argc, char **argv) {
 //		cout<<"indl = "<<indl<<", indu = "<<indu<<endl;
 		xs_brdn= 0;
 
-#ifdef DEBUG
-			outfile2<<"vtmp = "<<vtmp<<", delv = "<<delv<<", lower bound:"<<U238.xs_v[indl]<<", upper bound:"<<U238.xs_v[indu]<<endl;
-			outfile2<<"lower bound: "<<VtoE(vtmp-delv)<<", upper bound: "<<VtoE(vtmp+delv)<<endl;
-#endif
+//#ifdef DEBUG
+//			outfile2<<"vtmp = "<<vtmp<<", delv = "<<delv<<", lower bound:"<<U238.xs_v[indl]<<", upper bound:"<<U238.xs_v[indu]<<endl;
+//			outfile2<<"lower bound: "<<VtoE(vtmp-delv)<<", upper bound: "<<VtoE(vtmp+delv)<<endl;
+//#endif
 		
 		muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[indl]/(*it) + 3.));
 #ifdef MYERF
@@ -165,10 +169,10 @@ int main(int argc, char **argv) {
 			cdf = 0.5*(1 + erf(sqalpha*muvt));
 #endif			
 
-#ifdef DEBUG
-			outfile2<<U238.xs_E[j-1]<<" -- "<<U238.xs_E[j]<<"  "<<U238.xs_sig[j-1]<<"  "<<xs_sig_ave[j-1]<<endl;
-			outfile2<<cdf_p<<"  "<<cdf<<endl;
-#endif
+//#ifdef DEBUG
+//			outfile2<<U238.xs_E[j-1]<<" -- "<<U238.xs_E[j]<<"  "<<U238.xs_sig[j-1]<<"  "<<xs_sig_ave[j-1]<<endl;
+//			outfile2<<cdf_p<<"  "<<cdf<<endl;
+//#endif
 
 
 //			xs_brdn += U238.xs_sig[j] * (cdf - cdf_p) * U238.xs_v[j]/U238.xs_v[i];
@@ -187,9 +191,9 @@ int main(int argc, char **argv) {
 //		cout<<"Broadened xs at 0.025 eV at 300K: "<<xs_brdn<<endl;	
 	}
 
-#ifdef DEBUG	
-	outfile2.close();
-#endif
+//#ifdef DEBUG	
+//	outfile2.close();
+//#endif
 	
 #ifdef MYERF	
 	delerftb();
