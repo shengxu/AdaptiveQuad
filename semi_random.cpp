@@ -107,8 +107,12 @@ int main(int argc, char **argv) {
 //		outfile<<U238.xs_E[i]<<"  "<<U238.xs_sig[i]<<"  "<<xs_sig_ave[i]<<endl;
 //	}
 //	
+
 	int A = 238;
 	double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);  // alpha, as used in cullen's method
+//	int A = 236;
+//	double alpha = CONST::M_NEUT*A/(2.*CONST::K_BOLTZMANN*PARAM::T);
+	
 	double sqalpha = sqrt(alpha);   // square root of alpha
 	double delv = 4./sqrt(alpha);
 	double vpsq = 1/alpha;  // square of most probable velocity
@@ -149,7 +153,9 @@ int main(int argc, char **argv) {
 			outfile2<<"lower bound: "<<VtoE(vtmp-delv)<<", upper bound: "<<VtoE(vtmp+delv)<<endl;
 #endif
 		
-		muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[indl]/Etmp + 3.));
+//		muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[indl]/Etmp + 3.));
+		muvt = vtmp*(U238.xs_E[indl]/Etmp - 1)/(U238.xs_E[indl]/Etmp + 1);
+//		muvt = vtmp*(sqrt(U238.xs_E[indl]/Etmp) - 1);
 #ifdef MYERF
 		cdf_p = 0.5*(1 + myerf(sqalpha*muvt));
 #else
@@ -157,7 +163,9 @@ int main(int argc, char **argv) {
 #endif
 		for (int j=indl+1; j <= indu; j++) {
 //			muvt = U238.xs_v[i]*(sqrt(U238.xs_E[j]/U238.xs_E[i]) - 1);
-			muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[j]/Etmp + 3.));
+//			muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[j]/Etmp + 3.));
+			muvt = vtmp*(U238.xs_E[j]/Etmp - 1)/(U238.xs_E[j]/Etmp + 1);
+//			muvt = vtmp*(sqrt(U238.xs_E[j]/Etmp) - 1);
 //			muvt = 0.5*U238.xs_v[i]*(U238.xs_E[j]/U238.xs_E[i] - vT_over_v - 1);
 //			muvt = 0.5*U238.xs_v[i]*(sqrt(2*U238.xs_E[j]/U238.xs_E[i] - 1) - 1);
 #ifdef MYERF
