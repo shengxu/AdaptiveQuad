@@ -89,10 +89,9 @@ int main(int argc, char **argv) {
 	U238.xs_sig = xs_sig_ref;
 	U238.gridEtoV(U238.xs_E, U238.xs_v);
 	
-	
 	// sequence of energy points to broaden
 	// uniform in lethargy simulating neutron slowing down with H2O as moderator
-	double Ebegin = 2.5e2;  // upper bound to evaluate
+	double Ebegin = 1.95e4;  // upper bound to evaluate
 	double Eend = 1.;    // lower bound
 	int Npoints = 100000;  // number of equal-lethargy points
 	double ksi = log(Ebegin/Eend)/Npoints;
@@ -110,9 +109,12 @@ int main(int argc, char **argv) {
 		outfile<<U238.xs_E[i]<<"  "<<U238.xs_sig[i]<<"  "<<xs_sig_ave[i]<<endl;
 	}
 #endif
-	
+
 	int A = 238;
 	double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);  // alpha, as used in cullen's method
+//	int A = 236;
+//	double alpha = CONST::M_NEUT*A/(2.*CONST::K_BOLTZMANN*PARAM::T);
+	
 	double sqalpha = sqrt(alpha);   // square root of alpha
 	double delv = 4./sqrt(alpha);
 	double vpsq = 1/alpha;  // square of most probable velocity
@@ -125,15 +127,16 @@ int main(int argc, char **argv) {
 
 //	for (unsigned int i = 800000; i < U238.xs_v.size(); i++) {
 //		U238.xs_sig[i] *= 10;
-//	}
+//	}		
 
-//#ifdef DEBUG
-//		ofstream outfile2("fordebug.out");
-//#endif			
+#ifdef DEBUG
+		ofstream outfile2("fordebug.out");
+#endif	
 
-	for (auto it=Eseq.begin(); it != Eseq.end(); it++) {
-//	for (unsigned int i = 0; i < U238.xs_v.size(); i++) {	
-		double vtmp = EtoV(*it);
+	for (auto i=0; i < Eseq.size(); i++) {
+		double Etmp = Eseq[i];
+		double vtmp = EtoV(Etmp);
+
 //		double El = 0.5*CONST::M_NEUT*pow(U238.xs_v[i] - delv,2), Eu = 0.5*CONST::M_NEUT*pow(U238.xs_v[i] + delv,2);
 		int indl, indu;
 		vector<double>::iterator tmp;
@@ -147,12 +150,16 @@ int main(int argc, char **argv) {
 //		cout<<"indl = "<<indl<<", indu = "<<indu<<endl;
 		xs_brdn= 0;
 
-//#ifdef DEBUG
-//			outfile2<<"vtmp = "<<vtmp<<", delv = "<<delv<<", lower bound:"<<U238.xs_v[indl]<<", upper bound:"<<U238.xs_v[indu]<<endl;
-//			outfile2<<"lower bound: "<<VtoE(vtmp-delv)<<", upper bound: "<<VtoE(vtmp+delv)<<endl;
-//#endif
+#ifdef DEBUG
+			outfile2<<"vtmp = "<<vtmp<<", delv = "<<delv<<", lower bound:"<<U238.xs_v[indl]<<", upper bound:"<<U238.xs_v[indu]<<endl;
+			outfile2<<"lower bound: "<<VtoE(vtmp-delv)<<", upper bound: "<<VtoE(vtmp+delv)<<endl;
+#endif
 		
-		muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[indl]/(*it) + 3.));
+//		muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[indl]/Etmp + 3.));
+		muvt = vtmp*(U238.xs_E[indl]/Etmp - 1)/(U238.xs_E[indl]/Etmp + 1);
+//		muvt = vtmp*(sqrt(U238.xs_E[indl]/Etmp) - 1);
+
+
 #ifdef MYERF
 		cdf_p = 0.5*(1 + myerf(sqalpha*muvt));
 #else
@@ -160,7 +167,11 @@ int main(int argc, char **argv) {
 #endif
 		for (int j=indl+1; j <= indu; j++) {
 //			muvt = U238.xs_v[i]*(sqrt(U238.xs_E[j]/U238.xs_E[i]) - 1);
-			muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[j]/(*it) + 3.));
+
+//			muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[j]/Etmp + 3.));
+			muvt = vtmp*(U238.xs_E[j]/Etmp - 1)/(U238.xs_E[j]/Etmp + 1);
+//			muvt = vtmp*(sqrt(U238.xs_E[j]/Etmp) - 1);
+
 //			muvt = 0.5*U238.xs_v[i]*(U238.xs_E[j]/U238.xs_E[i] - vT_over_v - 1);
 //			muvt = 0.5*U238.xs_v[i]*(sqrt(2*U238.xs_E[j]/U238.xs_E[i] - 1) - 1);
 #ifdef MYERF
@@ -187,13 +198,14 @@ int main(int argc, char **argv) {
 		}
 //		cout<<"v = "<<v<<", delv = "<<delv<<", sig(v) = "<<U238.xs_sig[i]<<endl;
 
-		cout<<(*it)<<"  "<<vtmp<<"  "<<xs_brdn<<"  "<<indu - indl + 1<<endl;
+
+		cout<<Etmp<<"  "<<vtmp<<"  "<<xs_brdn<<"  "<<indu - indl + 1<<endl;
 //		cout<<"Broadened xs at 0.025 eV at 300K: "<<xs_brdn<<endl;	
 	}
 
-//#ifdef DEBUG	
-//	outfile2.close();
-//#endif
+#ifdef DEBUG	
+	outfile2.close();
+#endif
 	
 #ifdef MYERF	
 	delerftb();
