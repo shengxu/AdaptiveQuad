@@ -82,33 +82,39 @@ int main(int argc, char **argv) {
 		return r;
 	}
 	vector<double> xs_E_ref, xs_sig_ref, xs_sig_ave;
-	U238.refinemesh(atof(argv[2]), atof(argv[3]), xs_E_ref, xs_sig_ref, xs_sig_ave);
+	// input: energy width, xs differencd
+	U238.refinemesh(atof(argv[2]), atof(argv[3]), xs_E_ref, xs_sig_ref, xs_sig_ave);	
 //	cout<<"input parameters: "<<argv[2]<<" "<<argv[3]<<endl;
 	U238.xs_E = xs_E_ref;
 	U238.xs_sig = xs_sig_ref;
 	U238.gridEtoV(U238.xs_E, U238.xs_v);
 	
+	// sequence of energy points to broaden
+	// uniform in lethargy simulating neutron slowing down with H2O as moderator
+	double Ebegin = 1.95e4;  // upper bound to evaluate
+	double Eend = 1.;    // lower bound
+	int Npoints = 100000;  // number of equal-lethargy points
+	double ksi = log(Ebegin/Eend)/Npoints;
+	vector<double> Eseq;
+	while (Ebegin >= Eend) {
+		Eseq.push_back(Ebegin);
+		Ebegin *= exp(-ksi);
+	}
 	
-//	// sequence of energy points to broaden
-//	// uniform in lethargy simulating neutron slowing down with H2O as moderator
-//	double Ebegin = 1.9e4;  // 19 KeV
-//	double Eend = 1.;    // 1eV
-//	double ksi = 0.92;   // of H2O
-//	vector<double> Eseq;
-//	while (Ebegin >= Eend) {
-//		Eseq.push_back(Ebegin);
-//		Ebegin *= exp(-ksi);
-//	}
-	
-//	ofstream outfile("fordebug.out");
-//	outfile<<setprecision(15);
-//	outfile<<"size of xs_E: "<<U238.xs_E.size()<<", size of xs_sig_ave: "<<xs_sig_ave.size()<<endl;
-//	for (auto i=0; i < xs_sig_ave.size(); i++) {
-//		outfile<<U238.xs_E[i]<<"  "<<U238.xs_sig[i]<<"  "<<xs_sig_ave[i]<<endl;
-//	}
-//	
+#ifdef DEBUG	
+	ofstream outfile("fordebug.out");
+	outfile<<setprecision(15);
+	outfile<<"size of xs_E: "<<U238.xs_E.size()<<", size of xs_sig_ave: "<<xs_sig_ave.size()<<endl;
+	for (auto i=0; i < xs_sig_ave.size(); i++) {
+		outfile<<U238.xs_E[i]<<"  "<<U238.xs_sig[i]<<"  "<<xs_sig_ave[i]<<endl;
+	}
+#endif
+
 	int A = 238;
 	double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);  // alpha, as used in cullen's method
+//	int A = 236;
+//	double alpha = CONST::M_NEUT*A/(2.*CONST::K_BOLTZMANN*PARAM::T);
+	
 	double sqalpha = sqrt(alpha);   // square root of alpha
 	double delv = 4./sqrt(alpha);
 	double vpsq = 1/alpha;  // square of most probable velocity
@@ -123,16 +129,16 @@ int main(int argc, char **argv) {
 
 //	for (unsigned int i = 800000; i < U238.xs_v.size(); i++) {
 //		U238.xs_sig[i] *= 10;
-//	}
+//	}		
 
 #ifdef DEBUG
 		ofstream outfile2("fordebug.out");
-#endif			
+#endif	
 
-//	for (auto it=Eseq.begin(); it != Eseq.end(); it++) {
-	for (unsigned int i = 0; i < U238.xs_v.size(); i++) {	
-		double vtmp = U238.xs_v[i];
-		double Etmp = U238.xs_E[i];
+	for (auto i=0; i < Eseq.size(); i++) {
+		double Etmp = Eseq[i];
+		double vtmp = EtoV(Etmp);
+
 //		double El = 0.5*CONST::M_NEUT*pow(U238.xs_v[i] - delv,2), Eu = 0.5*CONST::M_NEUT*pow(U238.xs_v[i] + delv,2);
 		int indl, indu;
 		vector<double>::iterator tmp;
@@ -151,7 +157,11 @@ int main(int argc, char **argv) {
 			outfile2<<"lower bound: "<<VtoE(vtmp-delv)<<", upper bound: "<<VtoE(vtmp+delv)<<endl;
 #endif
 		
-		muvt_p = vtmp*(2./3. - 8./(9.*U238.xs_E[indl]/Etmp + 3.));
+//		muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[indl]/Etmp + 3.));
+		muvt_p = vtmp*(U238.xs_E[indl]/Etmp - 1)/(U238.xs_E[indl]/Etmp + 1);
+//		muvt = vtmp*(sqrt(U238.xs_E[indl]/Etmp) - 1);
+
+
 #ifdef MYERF
 		cdf_p = 0.5*(1 + myerf(sqalpha*muvt_p));
 #else
@@ -161,9 +171,12 @@ int main(int argc, char **argv) {
 		
 		for (int j=indl+1; j <= indu; j++) {
 //			muvt = U238.xs_v[i]*(sqrt(U238.xs_E[j]/U238.xs_E[i]) - 1);
-			muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[j]/Etmp + 3.));
-//			slope = (U238.xs_sig[j] - U238.xs_sig[j-1])/(muvt - muvt_p);
+
+//			muvt = vtmp*(2./3. - 8./(9.*U238.xs_E[j]/Etmp + 3.));
+			muvt = vtmp*(U238.xs_E[j]/Etmp - 1)/(U238.xs_E[j]/Etmp + 1);
+//			muvt = vtmp*(sqrt(U238.xs_E[j]/Etmp) - 1);
 			slope = (U238.xs_sig[j] - U238.xs_sig[j-1])/(U238.xs_E[j] - U238.xs_E[j-1]);
+
 //			muvt = 0.5*U238.xs_v[i]*(U238.xs_E[j]/U238.xs_E[i] - vT_over_v - 1);
 //			muvt = 0.5*U238.xs_v[i]*(sqrt(2*U238.xs_E[j]/U238.xs_E[i] - 1) - 1);
 #ifdef MYERF
@@ -186,7 +199,7 @@ int main(int argc, char **argv) {
 
 //			xs_brdn += xs_ave * (cdf - cdf_p) * vave/U238.xs_v[i];
 			xs_brdn += xs_ave * (cdf - cdf_p) + 2*slope*Etmp/vtmp*(upu_p - upu)/(2*CONST::SQRT_PI*sqalpha) +
-								 3*slope*Etmp/(vtmp*vtmp)*((muvt_p*upu_p-muvt*upu)/(2*CONST::SQRT_PI*sqalpha) + (cdf - cdf_p)/(2*alpha));
+								 2*slope*Etmp/(vtmp*vtmp)*((muvt_p*upu_p-muvt*upu)/(2*CONST::SQRT_PI*sqalpha) + (cdf - cdf_p)/(2*alpha));
 			
 			// update variables
 			muvt_p = muvt;
@@ -194,6 +207,7 @@ int main(int argc, char **argv) {
 			upu_p = upu;
 		}
 //		cout<<"v = "<<v<<", delv = "<<delv<<", sig(v) = "<<U238.xs_sig[i]<<endl;
+
 
 		cout<<Etmp<<"  "<<vtmp<<"  "<<xs_brdn<<"  "<<indu - indl + 1<<endl;
 //		cout<<"Broadened xs at 0.025 eV at 300K: "<<xs_brdn<<endl;	
