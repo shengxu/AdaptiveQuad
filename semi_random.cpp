@@ -89,16 +89,17 @@ int main(int argc, char **argv) {
 	U238.gridEtoV(U238.xs_E, U238.xs_v);
 	
 	
-//	// sequence of energy points to broaden
-//	// uniform in lethargy simulating neutron slowing down with H2O as moderator
-//	double Ebegin = 1.9e4;  // 19 KeV
-//	double Eend = 1.;    // 1eV
-//	double ksi = 0.92;   // of H2O
-//	vector<double> Eseq;
-//	while (Ebegin >= Eend) {
-//		Eseq.push_back(Ebegin);
-//		Ebegin *= exp(-ksi);
-//	}
+	// sequence of energy points to broaden
+	// uniform in lethargy simulating neutron slowing down with H2O as moderator
+	double Ebegin = 1.95e4;  // upper bound to evaluate
+	double Eend = 1.;    // lower bound
+	int Npoints = 100000;  // number of equal-lethargy points
+	double ksi = log(Ebegin/Eend)/Npoints;
+	vector<double> Eseq;
+	while (Ebegin >= Eend) {
+		Eseq.push_back(Ebegin);
+		Ebegin *= exp(-ksi);
+	}
 	
 //	ofstream outfile("fordebug.out");
 //	outfile<<setprecision(15);
@@ -131,7 +132,9 @@ int main(int argc, char **argv) {
 		ofstream outfile2("fordebug.out");
 #endif			
 
-//	for (auto it=Eseq.begin(); it != Eseq.end(); it++) {
+//	for (auto i=0; i<Eseq.size(); i++) {
+//		double Etmp = Eseq[i];
+//		double vtmp = EtoV(Eseq[i]);
 	for (unsigned int i = 0; i < U238.xs_v.size(); i++) {	
 		double vtmp = U238.xs_v[i];
 		double Etmp = U238.xs_E[i];
