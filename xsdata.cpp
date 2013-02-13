@@ -134,7 +134,8 @@ void isotope::refinemesh(const double delE, const double relxs, vector<double> &
 	
 	for (i = 1; i < xs_sig.size(); i++) {
 		bool stat1 = abs(xs_sig[i] - sigl)/sigl <= relxs;
-		bool stat2 = abs(xs_E[i] - El) <= delE*sqrt(El/6.67);
+		double delEnew = delE*sqrt(El/6.67);
+		bool stat2 = abs(xs_E[i] - El) <= delEnew;
 		if (stat1 && stat2) {
 			if (stat) {
 				xs_ave += 0.5*(xs_sig[i-1] + xs_sig[i])*(xs_E[i] - xs_E[i-1]);
@@ -143,9 +144,11 @@ void isotope::refinemesh(const double delE, const double relxs, vector<double> &
 				stat = true;
 			}
 		} else {
-			if (!stat1) { // xs criterion violated
-				findinterp(sigl, {xs_E[i-1], xs_sig[i-1]}, {xs_E[i], xs_sig[i]}, relxs, tmp);
-				Er = tmp.E; sigr = tmp.sig;
+			if (!stat2) { // energy criterion violated
+//				findinterp(sigl, {xs_E[i-1], xs_sig[i-1]}, {xs_E[i], xs_sig[i]}, relxs, tmp);
+//				Er = tmp.E; sigr = tmp.sig;
+				Er = El + delEnew;
+				sigr = xs_sig[i-1] + (xs_sig[i] -xs_sig[i-1])/(xs_E[i] - xs_E[i-1])*(Er - xs_E[i-1]);
 				xs_E_ref.push_back(Er);
 				xs_sig_ref.push_back(sigr);
 				if (stat) {
@@ -158,7 +161,7 @@ void isotope::refinemesh(const double delE, const double relxs, vector<double> &
 				stat = false;
 				xs_ave = 0;
 				i--;
-			} else {   // energy criterion violated
+			} else {   // ignore if xs criterion violated
 				Er = xs_E[i]; sigr = xs_sig[i];
 				xs_E_ref.push_back(Er);
 				xs_sig_ref.push_back(sigr);
