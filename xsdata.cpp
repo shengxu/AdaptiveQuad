@@ -133,9 +133,9 @@ void isotope::refinemesh(const double delE, const double relxs, vector<double> &
 	bool stat = false;  // indicate left boundary
 	
 	for (i = 1; i < xs_sig.size(); i++) {
-		bool stat1 = abs(xs_sig[i] - sigl)/sigl <= relxs;
+		bool stat1 = abs(xs_sig[i] - sigl)/sigl < relxs;
 		double delEnew = delE*sqrt(El/6.67);
-		bool stat2 = abs(xs_E[i] - El) <= delEnew;
+		bool stat2 = abs(xs_E[i] - El) < delEnew;
 		if (stat1 && stat2) {
 			if (stat) {
 				xs_ave += 0.5*(xs_sig[i-1] + xs_sig[i])*(xs_E[i] - xs_E[i-1]);
@@ -144,39 +144,31 @@ void isotope::refinemesh(const double delE, const double relxs, vector<double> &
 				stat = true;
 			}
 		} else {
-			if (!stat2) { // energy criterion violated
-//				findinterp(sigl, {xs_E[i-1], xs_sig[i-1]}, {xs_E[i], xs_sig[i]}, relxs, tmp);
-//				Er = tmp.E; sigr = tmp.sig;
+		
+			if (!stat1) { // xs criterion violated, energy criterion may or may not be violated
+				findinterp(sigl, {xs_E[i-1], xs_sig[i-1]}, {xs_E[i], xs_sig[i]}, relxs, tmp);
+				Er = tmp.E; sigr = tmp.sig;		
+				if (Er > El + delEnew) {
+					Er = El + delEnew;
+					sigr = xs_sig[i-1] + (xs_sig[i] -xs_sig[i-1])/(xs_E[i] - xs_E[i-1])*(Er - xs_E[i-1]);
+				}	
+			} else {   // energy criterion violated
+//				Er = xs_E[i]; sigr = xs_sig[i];
 				Er = El + delEnew;
 				sigr = xs_sig[i-1] + (xs_sig[i] -xs_sig[i-1])/(xs_E[i] - xs_E[i-1])*(Er - xs_E[i-1]);
-				xs_E_ref.push_back(Er);
-				xs_sig_ref.push_back(sigr);
-				if (stat) {
-					xs_ave += 0.5*(xs_sig[i-1] + sigr)*(Er - xs_E[i-1]);
-				} else {
-					xs_ave += 0.5*(sigl + sigr)*(Er - El);
-				}
-				xs_sig_ave.push_back(xs_ave/(Er - El));
-				El = Er; sigl = sigr;
-				stat = false;
-				xs_ave = 0;
-				i--;
-			} else {   // ignore if xs criterion violated
-				Er = xs_E[i]; sigr = xs_sig[i];
-				xs_E_ref.push_back(Er);
-				xs_sig_ref.push_back(sigr);
-				if (stat) {
-					xs_ave += 0.5*(xs_sig[i-1] + sigr)*(Er - xs_E[i-1]);
-				} else {
-					xs_ave += 0.5*(sigl + sigr)*(Er - El);
-				}
-				xs_sig_ave.push_back(xs_ave/(Er - El));
-				El = Er; sigl = sigr;
-				stat = false;
-				xs_ave = 0;
 			}
-			
-			
+			if (stat) {
+				xs_ave += 0.5*(xs_sig[i-1] + sigr)*(Er - xs_E[i-1]);
+			} else {
+				xs_ave += 0.5*(sigl + sigr)*(Er - El);
+			}
+			xs_E_ref.push_back(Er);
+			xs_sig_ref.push_back(sigr);
+			xs_sig_ave.push_back(xs_ave/(Er - El));
+			El = Er; sigl = sigr;
+			stat = false;
+			xs_ave = 0;
+			i--;
 		}		
 	}	
 	
