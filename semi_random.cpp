@@ -100,15 +100,16 @@ int main(int argc, char **argv) {
 		Eseq.push_back(Ebegin);
 		Ebegin *= exp(-ksi);
 	}
-	
-#ifdef DEBUG	
-	ofstream outfile("fordebug.out");
+
+	ofstream outfile;
+	outfile.open("fordebug.out", ios::out | ios::app);
 	outfile<<setprecision(15);
-	outfile<<"size of xs_E: "<<U238.xs_E.size()<<", size of xs_sig_ave: "<<xs_sig_ave.size()<<endl;
-	for (auto i=0; i < xs_sig_ave.size(); i++) {
-		outfile<<U238.xs_E[i]<<"  "<<U238.xs_sig[i]<<"  "<<xs_sig_ave[i]<<endl;
-	}
-#endif
+//	outfile<<"size of xs_E: "<<U238.xs_E.size()<<", size of xs_sig_ave: "<<xs_sig_ave.size()<<endl;
+//	for (auto i=0; i < xs_sig_ave.size(); i++) {
+//		outfile<<U238.xs_E[i]<<"  "<<U238.xs_sig[i]<<"  "<<xs_sig_ave[i]<<endl;
+//	}
+	outfile<<atof(argv[2])<<"  "<<atof(argv[3])<<"  "<<U238.xs_E.size()<<endl;
+	outfile.close();
 
 	int A = 238;
 	double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);  // alpha, as used in cullen's method
@@ -137,6 +138,12 @@ int main(int argc, char **argv) {
 		double Etmp = Eseq[i];
 		double vtmp = EtoV(Etmp);
 
+	for (auto i=0; i<Eseq.size(); i++) {
+		double Etmp = Eseq[i];
+		double vtmp = EtoV(Eseq[i]);
+//	for (unsigned int i = 0; i < U238.xs_v.size(); i++) {	
+//		double vtmp = U238.xs_v[i];
+//		double Etmp = U238.xs_E[i];
 //		double El = 0.5*CONST::M_NEUT*pow(U238.xs_v[i] - delv,2), Eu = 0.5*CONST::M_NEUT*pow(U238.xs_v[i] + delv,2);
 		int indl, indu;
 		vector<double>::iterator tmp;
