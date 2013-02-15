@@ -81,6 +81,12 @@ int main(int argc, char **argv) {
 		cout<<"Error in reading xs file!"<<endl;
 		return r;
 	}
+	auto ind2K = upper_bound(U238.xs_E.begin(), U238.xs_E.end(), 2.e4) - U238.xs_E.begin();
+	vector<double> tmpE(U238.xs_E.begin(), U238.xs_E.begin() + ind2K);
+	U238.xs_E = tmpE;
+	vector<double> tmpsig(U238.xs_sig.begin(), U238.xs_sig.begin() + ind2K);
+	U238.xs_sig = tmpsig;
+	
 	vector<double> xs_E_ref, xs_sig_ref, xs_sig_ave;
 	U238.refinemesh(atof(argv[2]), atof(argv[3]), xs_E_ref, xs_sig_ref, xs_sig_ave);
 //	cout<<"input parameters: "<<argv[2]<<" "<<argv[3]<<endl;
@@ -92,7 +98,7 @@ int main(int argc, char **argv) {
 	// sequence of energy points to broaden
 	// uniform in lethargy simulating neutron slowing down with H2O as moderator
 	double Ebegin = 1.95e4;  // upper bound to evaluate
-	double Eend = 1.;    // lower bound
+	double Eend = 100.;    // lower bound
 	int Npoints = 100000;  // number of equal-lethargy points
 	double ksi = log(Ebegin/Eend)/Npoints;
 	vector<double> Eseq;
