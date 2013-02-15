@@ -101,13 +101,15 @@ int main(int argc, char **argv) {
 		Ebegin *= exp(-ksi);
 	}
 	
-	ofstream outfile("fordebug.out");
+	ofstream outfile;
+	outfile.open("fordebug.out", ios::out | ios::app);
 	outfile<<setprecision(15);
-	outfile<<"size of xs_E: "<<U238.xs_E.size()<<", size of xs_sig_ave: "<<xs_sig_ave.size()<<endl;
-	for (auto i=0; i < xs_sig_ave.size(); i++) {
-		outfile<<U238.xs_E[i]<<"  "<<U238.xs_sig[i]<<"  "<<xs_sig_ave[i]<<endl;
-	}
-	
+//	outfile<<"size of xs_E: "<<U238.xs_E.size()<<", size of xs_sig_ave: "<<xs_sig_ave.size()<<endl;
+//	for (auto i=0; i < xs_sig_ave.size(); i++) {
+//		outfile<<U238.xs_E[i]<<"  "<<U238.xs_sig[i]<<"  "<<xs_sig_ave[i]<<endl;
+//	}
+	outfile<<atof(argv[2])<<"  "<<atof(argv[3])<<"  "<<U238.xs_E.size()<<endl;
+	outfile.close();
 
 	int A = 238;
 	double alpha = CONST::M_NUCLEON*A/(2.*CONST::K_BOLTZMANN*PARAM::T);  // alpha, as used in cullen's method
