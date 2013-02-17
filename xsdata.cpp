@@ -11,6 +11,21 @@ using namespace std;
 //vector<double> xs_v;
 //vector<double> xs_sig;
 
+typedef struct {
+	double E;
+	double sig;
+} XSpoint;
+
+inline void findinterp(const double sig_b, const XSpoint& left, const XSpoint& right, const double percent, XSpoint& result) {
+	if(right.sig >= sig_b) {
+		result.sig = sig_b*(1+percent);
+	} else {
+		result.sig = sig_b*(1-percent);
+	}
+	
+	result.E = left.E + (right.E - left.E)/(right.sig - left.sig)*(result.sig - left.sig);
+}
+
 int isotope::readxs(const string &filename, vector<double> &xs_E, vector<double> &xs_sig) {
 	double E, sig;
 	
@@ -36,8 +51,6 @@ int isotope::readxs(const string &filename, vector<double> &xs_E, vector<double>
 	return 0;
 }
 
-
-// E in eV
 void isotope::gridEtoV(vector<double> &xs_E, vector<double> &xs_v) {
 	for (auto it=xs_E.begin(); it<xs_E.end(); it++) {
 		xs_v.push_back(sqrt(2*(*it)*1.e-6/CONST::M_NEUT));
@@ -108,31 +121,60 @@ void isotope::refinemesh(const double delE, const double relxs, vector<double> &
 //		}
 //	}
 
+	XSpoint tmp;
 	// first element
+	double El = xs_E[0], sigl = xs_sig[0];
+	double Er, sigr;
+	
 	xs_E_ref.push_back(xs_E[0]);
 	xs_sig_ref.push_back(xs_sig[0]);
-	int j = 0;
 	unsigned int i;
-	double xs_ave = 0.5*xs_sig[0]*(xs_E[1] - xs_E[0]);
+	double xs_ave = 0;
+	bool stat = false;  // indicate left boundary
 	
-	for (i = 1; i < xs_sig.size()-1; i++) {
-		if (abs(xs_sig[i] - xs_sig[j])/xs_sig[j] <= relxs
-				&& abs(xs_E[i] - xs_E[j]) <= delE*sqrt(xs_E[j]/6.67) ) {
-			xs_ave += 0.5*xs_sig[i]*(xs_E[i+1] - xs_E[i-1]);
+	for (i = 1; i < xs_sig.size(); i++) {
+		bool stat1 = abs(xs_sig[i] - sigl)/sigl < relxs;
+		double delEnew = delE*sqrt(El/6.67);
+		bool stat2 = abs(xs_E[i] - El) < delEnew;
+		if (stat1 && stat2) {
+			if (stat) {
+				xs_ave += 0.5*(xs_sig[i-1] + xs_sig[i])*(xs_E[i] - xs_E[i-1]);
+			} else {
+				xs_ave += 0.5*(sigl + xs_sig[i])*(xs_E[i] - El);
+				stat = true;
+			}
 		} else {
-			xs_E_ref.push_back(xs_E[i]);
-			xs_sig_ref.push_back(xs_sig[i]);
-			xs_ave += 0.5*xs_sig[i]*(xs_E[i] - xs_E[i-1]);
-			xs_sig_ave.push_back(xs_ave/(xs_E[i] - xs_E[j]));			
-			xs_ave = 0.5*xs_sig[i]*(xs_E[i+1] - xs_E[i]);
-			j = i;
+		
+			if (!stat1) { // xs criterion violated, energy criterion may or may not be violated
+				findinterp(sigl, {xs_E[i-1], xs_sig[i-1]}, {xs_E[i], xs_sig[i]}, relxs, tmp);
+				Er = tmp.E; sigr = tmp.sig;		
+				if (Er > El + delEnew) {
+					Er = El + delEnew;
+					sigr = xs_sig[i-1] + (xs_sig[i] -xs_sig[i-1])/(xs_E[i] - xs_E[i-1])*(Er - xs_E[i-1]);
+				}	
+			} else {   // energy criterion violated
+//				Er = xs_E[i]; sigr = xs_sig[i];
+				Er = El + delEnew;
+				sigr = xs_sig[i-1] + (xs_sig[i] -xs_sig[i-1])/(xs_E[i] - xs_E[i-1])*(Er - xs_E[i-1]);
+			}
+			if (stat) {
+				xs_ave += 0.5*(xs_sig[i-1] + sigr)*(Er - xs_E[i-1]);
+			} else {
+				xs_ave += 0.5*(sigl + sigr)*(Er - El);
+			}
+			xs_E_ref.push_back(Er);
+			xs_sig_ref.push_back(sigr);
+			xs_sig_ave.push_back(xs_ave/(Er - El));
+			El = Er; sigl = sigr;
+			stat = false;
+			xs_ave = 0;
+			i--;
 		}		
 	}	
 	
 	// last element			
 	xs_E_ref.push_back(xs_E[i]);
 	xs_sig_ref.push_back(xs_sig[i]);
-	xs_ave += 0.5*xs_sig[i]*(xs_E[i] - xs_E[i-1]);
-	xs_sig_ave.push_back(xs_ave/(xs_E[i] - xs_E[j]));
+	xs_sig_ave.push_back(xs_ave/(xs_E[i] - El));
 	
 }

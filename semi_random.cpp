@@ -81,6 +81,12 @@ int main(int argc, char **argv) {
 		cout<<"Error in reading xs file!"<<endl;
 		return r;
 	}
+	auto ind2K = upper_bound(U238.xs_E.begin(), U238.xs_E.end(), 2.e4) - U238.xs_E.begin();
+	vector<double> tmpE(U238.xs_E.begin(), U238.xs_E.begin() + ind2K);
+	U238.xs_E = tmpE;
+	vector<double> tmpsig(U238.xs_sig.begin(), U238.xs_sig.begin() + ind2K);
+	U238.xs_sig = tmpsig;
+	
 	vector<double> xs_E_ref, xs_sig_ref, xs_sig_ave;
 	// input: energy width, xs differencd
 	U238.refinemesh(atof(argv[2]), atof(argv[3]), xs_E_ref, xs_sig_ref, xs_sig_ave);	
@@ -92,7 +98,7 @@ int main(int argc, char **argv) {
 	// sequence of energy points to broaden
 	// uniform in lethargy simulating neutron slowing down with H2O as moderator
 	double Ebegin = 1.95e4;  // upper bound to evaluate
-	double Eend = 1.;    // lower bound
+	double Eend = 100.;    // lower bound
 	int Npoints = 100000;  // number of equal-lethargy points
 	double ksi = log(Ebegin/Eend)/Npoints;
 	vector<double> Eseq;
@@ -195,7 +201,8 @@ int main(int argc, char **argv) {
 //			xs_brdn += U238.xs_sig[j] * (cdf - cdf_p) * U238.xs_v[j]/U238.xs_v[i];
 //			xs_brdn += 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1])* (cdf - cdf_p)* 0.5*(U238.xs_v[j] + U238.xs_v[j-1])/U238.xs_v[i];
 //			xs_ave = 0.5*(U238.xs_sig[j] + U238.xs_sig[j-1]);
-			xs_ave = U238.xs_sig[j-1] + slope*(Etmp - U238.xs_E[j-1]);
+//			xs_ave = U238.xs_sig[j-1] + slope*(Etmp - U238.xs_E[j-1]);
+			xs_ave = xs_sig_ave[j-1] + slope*(Etmp - (U238.xs_E[j-1]+U238.xs_E[j])/2.);
 
 //			xs_brdn += xs_ave * (cdf - cdf_p) * vave/U238.xs_v[i];
 			xs_brdn += xs_ave * (cdf - cdf_p) + 2*slope*Etmp/vtmp*(upu_p - upu)/(2*CONST::SQRT_PI*sqalpha) +
